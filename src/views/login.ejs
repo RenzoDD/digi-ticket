@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="/vendor/bootstrap.css">
+	<link rel="stylesheet" href="/vendor/bootstrap-icons.css">
+
+	<link rel="stylesheet" href="/css/style.css">
+
+	<title>Digi-Ticket - Login</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+	<%- include('./parts/header') %>
+
+	<main class="container mt-5">
+		<h1 class="fw-bold text-center">
+			<i class="bi bi-door-open"></i>
+			Login
+			<i class="bi bi-door-open"></i>
+		</h1>
+		<div class="row justify-content-center">
+			<div class="col-lg-5 col-md-8">
+				<form method="post">
+					<div class="mb-3">
+						<label for="txtEmail" class="form-label">Email address</label>
+						<input type="email" class="form-control" id="txtEmail" name="email">
+					</div>
+					<div class="mb-3">
+						<label for="txtPass" class="form-label">Password</label>
+						<input type="password" class="form-control" id="txtPass" name="password">
+					</div>
+					<div class="mb-3 text-center">
+						<button type="submit" class="btn btn-primary">Submit</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</main>
+
+	<%- include('./parts/footer') %>
+
+	<script src="/vendor/bootstrap.js"></script>
+</body>
+
+</html>

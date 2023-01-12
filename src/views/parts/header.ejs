@@ -15,9 +15,15 @@
                 <li class="nav-item">
                     <a class="nav-link active" href="#"><i class="bi bi-info-circle"></i> Info</a>
                 </li>
+                <% if (!session.user) { %>
                 <li class="nav-item">
-                    <a class="nav-link active" href="#"><i class="bi bi-door-open"></i> Login</a>
+                    <a class="nav-link active" href="/login"><i class="bi bi-door-open"></i> Login</a>
                 </li>
+                <% } else {%>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/logout"><i class="bi bi-door-closed"></i> Logout</a>
+                </li>
+                <% } %>
             </ul>
         </div>
     </div>
