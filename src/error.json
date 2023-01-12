@@ -1,0 +1,6 @@
+{
+    "login": {
+        "already-in": "Ya ha ingresado a la aplicación",
+        "invalid-credentials": "Usuario o contraseña incorrectos"
+    }
+}

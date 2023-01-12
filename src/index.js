@@ -44,8 +44,13 @@ app.set('views', __dirname + '/views')
 
 app.use('/', require('./routes/website'));
 
+app.all('/error/:page/:name', async function (req, res) {
+    var message = require('./error.json')[req.params.page][req.params.name];
+    res.render('error', { code: "/login", session: req.session, message })
+});
+
 app.all('*', async function (req, res) {
-    res.redirect("/");
+    res.redirect('/');
 });
 
 app.listen(process.env.PORT, async function () {
