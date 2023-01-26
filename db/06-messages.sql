@@ -13,6 +13,6 @@ CREATE TABLE Messages (
 	
     PRIMARY KEY (MessageID),
     FOREIGN KEY (TicketID)      REFERENCES Tickets (TicketID),
-    FOREIGN KEY (UserID)      REFERENCES Users (UserID),
-    FOREIGN KEY (PreviousID)       REFERENCES MessageID (Messages)
+    FOREIGN KEY (UserID)        REFERENCES Users (UserID),
+    FOREIGN KEY (PreviousID)    REFERENCES Messages (MessageID)
 ) //

@@ -14,7 +14,7 @@ CREATE TABLE Tickets (
     Status      INTEGER      NOT NULL   DEFAULT 1,      -- Ticket's status (1-created, 2-assigned, 3-aswered, 4-replied , 5-solved)
     Creation    INTEGER      NOT NULL,                  -- Creation time
 	
-    PRIMARY KEY (UserID),
+    PRIMARY KEY (TicketID),
     FOREIGN KEY (ClientID)      REFERENCES Users (UserID),
     FOREIGN KEY (SuportID)      REFERENCES Users (UserID),
     FOREIGN KEY (AdminID)       REFERENCES Users (UserID),
