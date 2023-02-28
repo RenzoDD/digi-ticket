@@ -16,3 +16,17 @@ CREATE TABLE Messages (
     FOREIGN KEY (UserID)        REFERENCES Users (UserID),
     FOREIGN KEY (PreviousID)    REFERENCES Messages (MessageID)
 ) //
+
+DROP PROCEDURE IF EXISTS Messages_Create //
+CREATE PROCEDURE Messages_Create ( IN TicketID INTEGER, IN UserID INTEGER, IN PreviousID INTEGER, IN Text VARCHAR(2500) )
+BEGIN
+    SET @unix = UNIX_TIMESTAMP();
+
+    INSERT INTO Messages (TicketID, UserID, PreviousID, Text, Creation)
+    VALUES (TicketID, UserID, PreviousID, Text, @unix);
+
+    SELECT  M.*
+    FROM    Messages AS M
+    WHERE   M.TicketID = TicketID
+            AND M.Creation = @unix;
+END //

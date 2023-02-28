@@ -5,8 +5,8 @@ CREATE TABLE Tickets (
     TicketID    INTEGER     NOT NULL    AUTO_INCREMENT, -- Ticket's ID
 
     ClientID    INTEGER     NOT NULL,                   -- Ticket's owner
-    SuportID    INTEGER     NOT NULL,                   -- Ticket's helpdesk employee
-    AdminID     INTEGER     NOT NULL,                   -- Ticket's helpdesk manager
+    SuportID    INTEGER,                                -- Ticket's helpdesk employee
+    AdminID     INTEGER,                                -- Ticket's helpdesk manager
 
     DeparmentID INTEGER     NOT NULL,                   -- Ticket's deparment
 
@@ -21,6 +21,20 @@ CREATE TABLE Tickets (
     FOREIGN KEY (AdminID)       REFERENCES Users (UserID),
     FOREIGN KEY (DeparmentID)   REFERENCES Deparments (DeparmentID)
 ) //
+
+DROP PROCEDURE IF EXISTS Tickets_Create //
+CREATE PROCEDURE Tickets_Create ( IN ClientID INTEGER, IN DeparmentID INTEGER, IN Subject VARCHAR(256) )
+BEGIN
+    SET @unix = UNIX_TIMESTAMP();
+
+    INSERT INTO Tickets (ClientID, DeparmentID, Subject, LastDate, Creation)
+    VALUES (ClientID, DeparmentID, Subject, @unix, @unix);
+
+    SELECT  T.*
+    FROM    Tickets AS T
+    WHERE   T.Subject = Subject
+            AND T.Creation = @unix;
+END //
 
 DROP PROCEDURE IF EXISTS Tickets_Read_ClientID //
 CREATE PROCEDURE Tickets_Read_ClientID ( IN ClientID INTEGER )

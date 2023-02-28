@@ -31,8 +31,18 @@ router.get('/tickets', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
     var deparments = await MySQL.Query("CALL Deparments_Read_All()");
-    var tickets = await MySQL.Query("CALL Tickets_Read_ClientID(?)", [ req.session.user.UserID ])
+    var tickets = await MySQL.Query("CALL Tickets_Read_ClientID(?)", [req.session.user.UserID])
     res.render("tickets", { code: "/tickets", session: req.session, deparments, tickets });
+});
+// Create ticket
+router.post('/create', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+
+    var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [req.session.user.UserID, req.body.deparment, req.body.subject]);
+    ticket = ticket[0]
+    var message = await MySQL.Query("CALL Messages_Create(?,?,?,?)", [ticket.TicketID, req.session.user.UserID, null, req.body.message]);
+    return res.redirect("/tickets");
 });
 
 module.exports = router;
