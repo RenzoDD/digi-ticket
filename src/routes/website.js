@@ -26,4 +26,13 @@ router.post('/login', async function (req, res) {
     return res.redirect('/');
 });
 
+// Tickets
+router.get('/tickets', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+    var deparments = await MySQL.Query("CALL Deparments_Read_All()");
+    var tickets = await MySQL.Query("CALL Tickets_Read_ClientID(?)", [ req.session.user.UserID ])
+    res.render("tickets", { code: "/tickets", session: req.session, deparments, tickets });
+});
+
 module.exports = router;

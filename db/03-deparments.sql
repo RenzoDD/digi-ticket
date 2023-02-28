@@ -11,3 +11,10 @@ CREATE TABLE Deparments (
 
 INSERT INTO Deparments (Name)
 VALUES ("General Inquiry"), ("Operations"), ("Finances"), ("Human Resources"), ("Information Technology"), ("Marketing");
+
+DROP PROCEDURE IF EXISTS Deparments_Read_All //
+CREATE PROCEDURE Deparments_Read_All ( )
+BEGIN
+    SELECT  D.*
+    FROM    Deparments AS D;
+END //
