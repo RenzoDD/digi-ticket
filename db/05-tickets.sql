@@ -39,7 +39,12 @@ END //
 DROP PROCEDURE IF EXISTS Tickets_Read_ClientID //
 CREATE PROCEDURE Tickets_Read_ClientID ( IN ClientID INTEGER )
 BEGIN
+    SET time_zone = '-05:00';
     SELECT  T.*
-    FROM    Tickets AS T
-    WHERE   T.ClientID = ClientID;
+            , D.Name AS DeparmentName
+            , FROM_UNIXTIME(LastDate, "%b. %D %Y (%H:%i)") AS LastDateFormat
+            , IF (T.Status = 1, "Created", IF (T.Status = 2, "Assigned", IF (T.Status = 3, "Aswered", IF (T.Status = 4, "Replied", IF (T.Status = 5, "Solved", "Error"))))) AS StatusFormat
+    FROM    Tickets AS T, Deparments AS D
+    WHERE   T.DeparmentID = D.DeparmentID
+            AND T.ClientID = ClientID;
 END //
