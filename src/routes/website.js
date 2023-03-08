@@ -45,6 +45,7 @@ router.post('/create', async function (req, res) {
     return res.redirect("/tickets");
 });
 
+// Ticket
 router.get('/ticket/:id', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
@@ -52,5 +53,13 @@ router.get('/ticket/:id', async function (req, res) {
     ticket = ticket[0];
     var messages = await MySQL.Query("CALL Messages_Read_TicketID(?)", [req.params.id])
     res.render("ticket", { code: "/tickets", session: req.session, ticket, messages });
+});
+// Answer ticket
+router.post('/answer', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+
+    await MySQL.Query("CALL Messages_Create(?,?,?)", [req.body.ticket, req.session.user.UserID, req.body.message]);
+    return res.redirect("/ticket/" + req.body.ticket);
 });
 module.exports = router;
