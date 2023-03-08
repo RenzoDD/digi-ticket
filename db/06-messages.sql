@@ -6,27 +6,36 @@ CREATE TABLE Messages (
 
     TicketID    INTEGER         NOT NULL,                   -- Message's ticket
     UserID      INTEGER         NOT NULL,                   -- Message's owner
-    PreviousID  INTEGER,                                    -- Previous Message
 
     Text        VARCHAR(2500)   NOT NULL,                   -- Message's text
     Creation    INTEGER         NOT NULL,                   -- Creation time
 	
     PRIMARY KEY (MessageID),
     FOREIGN KEY (TicketID)      REFERENCES Tickets (TicketID),
-    FOREIGN KEY (UserID)        REFERENCES Users (UserID),
-    FOREIGN KEY (PreviousID)    REFERENCES Messages (MessageID)
+    FOREIGN KEY (UserID)        REFERENCES Users (UserID)
 ) //
 
 DROP PROCEDURE IF EXISTS Messages_Create //
-CREATE PROCEDURE Messages_Create ( IN TicketID INTEGER, IN UserID INTEGER, IN PreviousID INTEGER, IN Text VARCHAR(2500) )
+CREATE PROCEDURE Messages_Create ( IN TicketID INTEGER, IN UserID INTEGER, IN Text VARCHAR(2500) )
 BEGIN
     SET @unix = UNIX_TIMESTAMP();
 
-    INSERT INTO Messages (TicketID, UserID, PreviousID, Text, Creation)
-    VALUES (TicketID, UserID, PreviousID, Text, @unix);
+    INSERT INTO Messages (TicketID, UserID, Text, Creation)
+    VALUES (TicketID, UserID, Text, @unix);
 
     SELECT  M.*
     FROM    Messages AS M
     WHERE   M.TicketID = TicketID
             AND M.Creation = @unix;
+END //
+
+DROP PROCEDURE IF EXISTS Messages_Read_TicketID //
+CREATE PROCEDURE Messages_Read_TicketID ( IN TicketID INTEGER )
+BEGIN
+    SELECT  M.*
+            , FROM_UNIXTIME(Creation, "%b. %D %Y (%H:%i)") AS CreationFormat
+            , CONCAT(U.Name, " ", U.Lastname) AS UserName
+    FROM    Messages AS M, Users as U
+    WHERE   M.UserID = U.UserID 
+            AND M.TicketID = TicketID;
 END //

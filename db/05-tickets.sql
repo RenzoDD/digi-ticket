@@ -48,3 +48,16 @@ BEGIN
     WHERE   T.DeparmentID = D.DeparmentID
             AND T.ClientID = ClientID;
 END //
+
+DROP PROCEDURE IF EXISTS Tickets_Read_TicketID //
+CREATE PROCEDURE Tickets_Read_TicketID ( IN TicketID INTEGER )
+BEGIN
+    SET time_zone = '-05:00';
+    SELECT  T.*
+            , D.Name AS DeparmentName
+            , FROM_UNIXTIME(LastDate, "%b. %D %Y (%H:%i)") AS LastDateFormat
+            , IF (T.Status = 1, "Created", IF (T.Status = 2, "Assigned", IF (T.Status = 3, "Aswered", IF (T.Status = 4, "Replied", IF (T.Status = 5, "Solved", "Error"))))) AS StatusFormat
+            , CONCAT(U.Name, " ", U.Lastname) AS SuportName
+    FROM    (Tickets AS T INNER JOIN Deparments AS D ON T.DeparmentID = D.DeparmentID) LEFT JOIN Users AS U ON T.SuportID = U.UserID
+    WHERE   T.TicketID = TicketID;
+END //
