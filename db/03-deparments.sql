@@ -10,7 +10,7 @@ CREATE TABLE Deparments (
 ) //
 
 INSERT INTO Deparments (Name)
-VALUES ("General Inquiry"), ("Operations"), ("Finances"), ("Human Resources"), ("Information Technology"), ("Marketing");
+VALUES ("General Support"), ("Domain/DNS Support"), ("FTP/SSH Support"), ("Mail Support"), ("cPanel Help"), ("Script Installation"), ("Website Transfer"), ("SSL Installation/Setup"), ("Billing/Sales");
 
 DROP PROCEDURE IF EXISTS Deparments_Read_All //
 CREATE PROCEDURE Deparments_Read_All ( )

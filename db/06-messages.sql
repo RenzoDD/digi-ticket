@@ -34,7 +34,7 @@ CREATE PROCEDURE Messages_Read_TicketID ( IN TicketID INTEGER )
 BEGIN
     SELECT  M.*
             , FROM_UNIXTIME(Creation, "%b. %D %Y (%H:%i)") AS CreationFormat
-            , CONCAT(U.Name, " ", U.Lastname) AS UserName
+            , U.Name AS UserName
     FROM    Messages AS M, Users as U
     WHERE   M.UserID = U.UserID 
             AND M.TicketID = TicketID;

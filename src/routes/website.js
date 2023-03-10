@@ -30,14 +30,19 @@ router.post('/login', async function (req, res) {
 router.get('/tickets', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
+    if (req.session.user.Type !== 1)
+        return res.redirect("/");
+
     var deparments = await MySQL.Query("CALL Deparments_Read_All()");
     var tickets = await MySQL.Query("CALL Tickets_Read_ClientID(?)", [req.session.user.UserID])
-    res.render("tickets", { code: "/tickets", session: req.session, deparments, tickets });
+    res.render("tickets", { code: "/tickets", title: "Ticket's list", session: req.session, deparments, tickets });
 });
 // Create ticket
 router.post('/create', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
+    if (req.session.user.Type !== 1)
+        return res.redirect("/");
 
     var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [req.session.user.UserID, req.body.deparment, req.body.subject]);
     ticket = ticket[0]
@@ -49,10 +54,11 @@ router.post('/create', async function (req, res) {
 router.get('/ticket/:id', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
+        
     var ticket = await MySQL.Query("CALL Tickets_Read_TicketID(?)", [req.params.id])
     ticket = ticket[0];
     var messages = await MySQL.Query("CALL Messages_Read_TicketID(?)", [req.params.id])
-    res.render("ticket", { code: "/tickets", session: req.session, ticket, messages });
+    return res.render("ticket", { code: "/tickets", session: req.session, ticket, messages });
 });
 // Answer ticket
 router.post('/answer', async function (req, res) {
@@ -61,5 +67,17 @@ router.post('/answer', async function (req, res) {
 
     await MySQL.Query("CALL Messages_Create(?,?,?)", [req.body.ticket, req.session.user.UserID, req.body.message]);
     return res.redirect("/ticket/" + req.body.ticket);
+});
+
+// Assign
+router.get('/assign', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+    if (req.session.user.Type !== 3)
+        return res.redirect("/");
+
+    var tickets = await MySQL.Query("CALL Tickets_Read_Unassigned()");
+
+    return res.render("tickets", { code: "/assign", title: "Assign ticket", session: req.session, tickets });
 });
 module.exports = router;
