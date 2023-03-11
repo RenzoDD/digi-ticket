@@ -30,11 +30,12 @@ router.post('/login', async function (req, res) {
 router.get('/tickets', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
-    if (req.session.user.Type !== 1)
-        return res.redirect("/");
-
-    var deparments = await MySQL.Query("CALL Deparments_Read_All()");
-    var tickets = await MySQL.Query("CALL Tickets_Read_ClientID(?)", [req.session.user.UserID])
+    if (req.session.user.Type === 1) {
+        var deparments = await MySQL.Query("CALL Deparments_Read_All()");
+        var tickets = await MySQL.Query("CALL Tickets_Read_ClientID(?)", [req.session.user.UserID]);
+    } else if (req.session.user.Type === 3) {
+        var tickets = await MySQL.Query("CALL Tickets_Read_Assigned_DeparmentID(?)", [req.session.user.DeparmentID]);
+    }
     res.render("tickets", { code: "/tickets", title: "Ticket's list", session: req.session, deparments, tickets });
 });
 // Create ticket
@@ -54,11 +55,16 @@ router.post('/create', async function (req, res) {
 router.get('/ticket/:id', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
-        
+
     var ticket = await MySQL.Query("CALL Tickets_Read_TicketID(?)", [req.params.id])
     ticket = ticket[0];
+
     var messages = await MySQL.Query("CALL Messages_Read_TicketID(?)", [req.params.id])
-    return res.render("ticket", { code: "/tickets", session: req.session, ticket, messages });
+
+    var deparments = await MySQL.Query("CALL Deparments_Read_All()")
+    var employees = await MySQL.Query("CALL Users_Read_DeparmentID(?)", [req.session.user.DeparmentID])
+
+    return res.render("ticket", { code: "/tickets", session: req.session, ticket, messages, deparments, employees });
 });
 // Answer ticket
 router.post('/answer', async function (req, res) {
@@ -69,15 +75,38 @@ router.post('/answer', async function (req, res) {
     return res.redirect("/ticket/" + req.body.ticket);
 });
 
-// Assign
+// Assign list
 router.get('/assign', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
     if (req.session.user.Type !== 3)
         return res.redirect("/");
 
-    var tickets = await MySQL.Query("CALL Tickets_Read_Unassigned()");
+    var tickets = await MySQL.Query("CALL Tickets_Read_Unassigned_DeparmentID(?)", [req.session.user.DeparmentID]);
 
     return res.render("tickets", { code: "/assign", title: "Assign ticket", session: req.session, tickets });
 });
+// Assign ticket
+router.post('/assign', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+    if (req.session.user.Type !== 3)
+        return res.redirect("/");
+
+    await MySQL.Query("CALL Tickets_Update_SupportID(?,?)", [req.body.ticket, req.body.employee]);
+
+    return res.redirect("/ticket/" + req.body.ticket);
+});
+// Change ticket deparment
+router.post('/deparment', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+    if (req.session.user.Type !== 3)
+        return res.redirect("/");
+
+    await MySQL.Query("CALL Tickets_Update_DeparmentID(?,?)", [req.body.ticket, req.body.deparment]);
+
+    return res.redirect("/tickets");
+});
+
 module.exports = router;

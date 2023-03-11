@@ -28,6 +28,43 @@
 				<i class="bi bi-plus-circle"></i> Create ticket
 			</button>
 		</div>
+		<div class="modal fade" id="create" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<form action="/create" method="post">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5">
+								<i class="bi bi-plus-circle"></i> Create ticket
+							</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<div class="modal-body">
+							<div class="mb-3">
+								<label class="form-label">Deparment</label>
+								<select class="form-select" name="deparment">
+									<option value="null" selected>Select deparment</option>
+									<% for (var deparment of deparments) { %>
+									<option value="<%- deparment.DeparmentID %>"><%- deparment.Name %></option>
+									<% } %>
+								</select>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Subject</label>
+								<input type="text" class="form-control" name="subject">
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Message</label>
+								<textarea class="form-control" rows="3" name="message"></textarea>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-sm btn-success">Create</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 		<% } %>
 
 		<div class="table-responsive">
@@ -65,46 +102,6 @@
 	</main>
 
 	<%- include('./parts/footer') %>
-
-	<% if (session.user.Type === 1) { %>
-	<div class="modal fade" id="create" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<form action="/create" method="post">
-					<div class="modal-header">
-						<h1 class="modal-title fs-5">
-							<i class="bi bi-plus-circle"></i> Create ticket
-						</h1>
-						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-					</div>
-					<div class="modal-body">
-						<div class="mb-3">
-							<label class="form-label">Deparment</label>
-							<select class="form-select" name="deparment">
-								<option value="null" selected>Select deparment</option>
-								<% for (var deparment of deparments) { %>
-								<option value="<%- deparment.DeparmentID %>"><%- deparment.Name %></option>
-								<% } %>
-							</select>
-						</div>
-						<div class="mb-3">
-							<label class="form-label">Subject</label>
-							<input type="text" class="form-control" name="subject">
-						</div>
-						<div class="mb-3">
-							<label class="form-label">Message</label>
-							<textarea class="form-control" rows="3" name="message"></textarea>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-						<button type="submit" class="btn btn-sm btn-success">Create</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-	<% } %>
 
 	<script src="/vendor/bootstrap.js"></script>
 </body>

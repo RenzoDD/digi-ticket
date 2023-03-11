@@ -17,13 +17,13 @@ CREATE TABLE Users (
 ) //
 
 DROP PROCEDURE IF EXISTS Users_Create //
-CREATE PROCEDURE Users_Create ( IN DeparmentID INTEGER, IN Name VARCHAR(64), IN Email VARCHAR(64), IN Password VARCHAR(64) )
+CREATE PROCEDURE Users_Create ( IN Type INTEGER, IN DeparmentID INTEGER, IN Name VARCHAR(64), IN Email VARCHAR(64), IN Password VARCHAR(64) )
 BEGIN
     SET @salt = Nonce(64);
     SET @pass = SHA256(CONCAT(Password, @salt));
 
-    INSERT INTO Users (DeparmentID, Name, Email, Password, Salt)
-    VALUES (DeparmentID, Name, Email, @pass, @salt);
+    INSERT INTO Users (Type, DeparmentID, Name, Email, Password, Salt)
+    VALUES (Type, DeparmentID, Name, Email, @pass, @salt);
 
     SELECT  U.*
     FROM    Users AS U
@@ -38,3 +38,18 @@ BEGIN
     WHERE   U.Email = Email
             AND U.Password = SHA256(CONCAT(Password, U.Salt));
 END //
+
+DROP PROCEDURE IF EXISTS Users_Read_DeparmentID //
+CREATE PROCEDURE Users_Read_DeparmentID ( IN DeparmentID INTEGER )
+BEGIN
+    SELECT  U.*
+    FROM    Users AS U
+    WHERE   U.Type != 1
+            AND U.DeparmentID = DeparmentID;
+END //
+
+CALL Users_Create(1, null, "Renzo Diaz", "renzo@remadi.net", "1234");
+CALL Users_Create(2, 1, "John Yengle", "john@remadi.net", "password");
+CALL Users_Create(2, 2, "Carlos Colina", "carlos@remadi.net", "hola");
+CALL Users_Create(3, 1, "Andres Mares", "andres@remadi.net", "abc123");
+CALL Users_Create(3, 2, "Yadira Lopez", "yadira@remadi.net", "qwerty");

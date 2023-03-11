@@ -5,8 +5,7 @@ CREATE TABLE Tickets (
     TicketID    INTEGER     NOT NULL    AUTO_INCREMENT, -- Ticket's ID
 
     ClientID    INTEGER     NOT NULL,                   -- Ticket's owner
-    SuportID    INTEGER,                                -- Ticket's helpdesk employee
-    AdminID     INTEGER,                                -- Ticket's helpdesk manager
+    SupportID   INTEGER,                                -- Ticket's helpdesk employee
 
     DeparmentID INTEGER     NOT NULL,                   -- Ticket's deparment
 
@@ -17,8 +16,7 @@ CREATE TABLE Tickets (
 	
     PRIMARY KEY (TicketID),
     FOREIGN KEY (ClientID)      REFERENCES Users (UserID),
-    FOREIGN KEY (SuportID)      REFERENCES Users (UserID),
-    FOREIGN KEY (AdminID)       REFERENCES Users (UserID),
+    FOREIGN KEY (SupportID)     REFERENCES Users (UserID),
     FOREIGN KEY (DeparmentID)   REFERENCES Deparments (DeparmentID)
 ) //
 
@@ -48,8 +46,8 @@ BEGIN
     WHERE   T.ClientID = ClientID;
 END //
 
-DROP PROCEDURE IF EXISTS Tickets_Read_Unassigned //
-CREATE PROCEDURE Tickets_Read_Unassigned ( )
+DROP PROCEDURE IF EXISTS Tickets_Read_Unassigned_DeparmentID //
+CREATE PROCEDURE Tickets_Read_Unassigned_DeparmentID ( IN DeparmentID INTEGER )
 BEGIN
     SET time_zone = '-05:00';
     SELECT  T.*
@@ -57,7 +55,21 @@ BEGIN
             , FROM_UNIXTIME(LastDate, "%b. %D %Y (%H:%i)") AS LastDateFormat
             , IF (T.Status = 1, "Created", IF (T.Status = 2, "Assigned", IF (T.Status = 3, "Aswered", IF (T.Status = 4, "Replied", IF (T.Status = 5, "Solved", "Error"))))) AS StatusFormat
     FROM    Tickets AS T INNER JOIN Deparments AS D ON T.DeparmentID = D.DeparmentID
-    WHERE   ISNULL(SuportID);
+    WHERE   ISNULL(T.SupportID)
+            AND T.DeparmentID = DeparmentID;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Read_Assigned_DeparmentID //
+CREATE PROCEDURE Tickets_Read_Assigned_DeparmentID ( IN DeparmentID INTEGER )
+BEGIN
+    SET time_zone = '-05:00';
+    SELECT  T.*
+            , D.Name AS DeparmentName
+            , FROM_UNIXTIME(LastDate, "%b. %D %Y (%H:%i)") AS LastDateFormat
+            , IF (T.Status = 1, "Created", IF (T.Status = 2, "Assigned", IF (T.Status = 3, "Aswered", IF (T.Status = 4, "Replied", IF (T.Status = 5, "Solved", "Error"))))) AS StatusFormat
+    FROM    Tickets AS T INNER JOIN Deparments AS D ON T.DeparmentID = D.DeparmentID
+    WHERE   !ISNULL(T.SupportID)
+            AND T.DeparmentID = DeparmentID;
 END //
 
 DROP PROCEDURE IF EXISTS Tickets_Read_TicketID //
@@ -68,7 +80,23 @@ BEGIN
             , D.Name AS DeparmentName
             , FROM_UNIXTIME(LastDate, "%b. %D %Y (%H:%i)") AS LastDateFormat
             , IF (T.Status = 1, "Created", IF (T.Status = 2, "Assigned", IF (T.Status = 3, "Aswered", IF (T.Status = 4, "Replied", IF (T.Status = 5, "Solved", "Error"))))) AS StatusFormat
-            , U.Name AS SuportName
-    FROM    (Tickets AS T INNER JOIN Deparments AS D ON T.DeparmentID = D.DeparmentID) LEFT JOIN Users AS U ON T.SuportID = U.UserID
+            , U.Name AS SupportName
+    FROM    (Tickets AS T INNER JOIN Deparments AS D ON T.DeparmentID = D.DeparmentID) LEFT JOIN Users AS U ON T.SupportID = U.UserID
+    WHERE   T.TicketID = TicketID;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Update_SupportID //
+CREATE PROCEDURE Tickets_Update_SupportID ( IN TicketID INTEGER, IN SupportID INTEGER )
+BEGIN
+    UPDATE  Tickets AS T
+    SET     T.SupportID = SupportID
+    WHERE   T.TicketID = TicketID;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Update_DeparmentID //
+CREATE PROCEDURE Tickets_Update_DeparmentID ( IN TicketID INTEGER, IN DeparmentID INTEGER )
+BEGIN
+    UPDATE  Tickets AS T
+    SET     T.DeparmentID = DeparmentID
     WHERE   T.TicketID = TicketID;
 END //
