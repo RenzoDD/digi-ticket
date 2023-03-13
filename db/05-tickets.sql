@@ -2,17 +2,18 @@ DELIMITER //
 
 DROP TABLE IF EXISTS Tickets //
 CREATE TABLE Tickets (
-    TicketID    INTEGER     NOT NULL    AUTO_INCREMENT, -- Ticket's ID
+    TicketID        INTEGER     NOT NULL    AUTO_INCREMENT, -- Ticket's ID
 
-    ClientID    INTEGER     NOT NULL,                   -- Ticket's owner
-    SupportID   INTEGER,                                -- Ticket's helpdesk employee
+    ClientID        INTEGER     NOT NULL,                   -- Ticket's owner
+    SupportID       INTEGER,                                -- Ticket's helpdesk employee
 
-    DeparmentID INTEGER     NOT NULL,                   -- Ticket's deparment
+    DeparmentID     INTEGER     NOT NULL,                   -- Ticket's deparment
 
-    Subject     VARCHAR(256) NOT NULL,                  -- Ticket's title                          (by team) (by client)
-    Status      INTEGER      NOT NULL   DEFAULT 1,      -- Ticket's status (1-created, 2-assigned, 3-aswered, 4-replied , 5-solved)
-    StatusDate    INTEGER      NOT NULL,                  -- Last update date
-    Creation    INTEGER      NOT NULL,                  -- Creation time
+    Subject         VARCHAR(256) NOT NULL,                  -- Ticket's title                          (by team) (by client)
+    Status          INTEGER      NOT NULL   DEFAULT 1,      -- Ticket's status (1-created, 2-assigned, 3-aswered, 4-replied , 5-solved)
+    StatusDate      INTEGER      NOT NULL,                  -- Last update date
+    Satisfaction    INTEGER,                                -- Satisfaction level
+    Creation        INTEGER      NOT NULL,                  -- Creation time
 	
     PRIMARY KEY (TicketID),
     FOREIGN KEY (ClientID)      REFERENCES Users (UserID),
@@ -115,5 +116,15 @@ BEGIN
 
     UPDATE  Tickets AS T
     SET     T.Status = Status, T.StatusDate = @unix
+    WHERE   T.TicketID = TicketID;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Update_Satisfaction //
+CREATE PROCEDURE Tickets_Update_Satisfaction ( IN TicketID INTEGER, IN Satisfaction INTEGER )
+BEGIN
+    SET @unix = UNIX_TIMESTAMP();
+
+    UPDATE  Tickets AS T
+    SET     T.Satisfaction = Satisfaction
     WHERE   T.TicketID = TicketID;
 END //

@@ -71,7 +71,13 @@ router.get('/ticket/:id', async function (req, res) {
     var ticket = await MySQL.Query("CALL Tickets_Read_TicketID(?)", [req.params.id])
     ticket = ticket[0];
 
-    var messages = await MySQL.Query("CALL Messages_Read_TicketID(?)", [req.params.id])
+    if (req.session.user.UserID !== ticket.ClientID && req.session.user.UserID !== ticket.SupportID && req.session.user.Type !== 3)
+        return res.redirect("/");
+
+    var ticket = await MySQL.Query("CALL Tickets_Read_TicketID(?)", [req.params.id])
+    ticket = ticket[0];
+
+    var messages = await MySQL.Query("CALL Messages_Read_TicketID(?)", [ticket.TicketID])
 
     var deparments = await MySQL.Query("CALL Deparments_Read_All()")
     var employees = await MySQL.Query("CALL Users_Read_DeparmentID(?)", [req.session.user.DeparmentID])
@@ -83,23 +89,51 @@ router.post('/answer', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
 
-    await MySQL.Query("CALL Messages_Create(?,?,?)", [req.body.ticket, req.session.user.UserID, req.body.message]);
+    var ticket = await MySQL.Query("CALL Tickets_Read_TicketID(?)", [req.body.ticket])
+    ticket = ticket[0];
 
-    if (req.session.user.Type === 1)
-        await MySQL.Query("CALL Tickets_Update_Status(?,?)", [req.body.ticket, global.states.Replied])
-    else
-        await MySQL.Query("CALL Tickets_Update_Status(?,?)", [req.body.ticket, global.states.Aswered])
+    if (req.session.user.UserID !== ticket.ClientID && req.session.user.UserID !== ticket.SupportID)
+        return res.redirect("/");
 
-    return res.redirect("/ticket/" + req.body.ticket);
+    await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
+
+    if (req.session.user.Type === 1) {
+        if (ticket.Status !== global.states.Created && ticket.Status !== global.states.Assigned)
+            await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Replied])
+    } else
+        await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Aswered])
+
+    return res.redirect("/ticket/" + ticket.TicketID);
 });
 // Close ticket
 router.post('/close', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
 
-    await MySQL.Query("CALL Tickets_Update_Status(?,?)", [req.body.ticket, global.states.Closed])
+    var ticket = await MySQL.Query("CALL Tickets_Read_TicketID(?)", [req.body.ticket])
+    ticket = ticket[0];
 
-    return res.redirect("/ticket/" + req.body.ticket);
+    if (req.session.user.UserID !== ticket.ClientID && req.session.user.UserID !== ticket.SupportID)
+        return res.redirect("/");
+
+    await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Closed])
+
+    return res.redirect("/ticket/" + ticket.TicketID);
+});
+// Rate ticket
+router.post('/rate', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+
+    var ticket = await MySQL.Query("CALL Tickets_Read_TicketID(?)", [req.body.ticket])
+    ticket = ticket[0];
+
+    if (req.session.user.UserID !== ticket.ClientID)
+        return res.redirect("/");
+
+    await MySQL.Query("CALL Tickets_Update_Satisfaction(?,?)", [ticket.TicketID, req.body.points])
+
+    return res.redirect("/ticket/" + ticket.TicketID);
 });
 
 // Assign list
