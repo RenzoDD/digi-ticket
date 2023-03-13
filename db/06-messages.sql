@@ -35,6 +35,7 @@ BEGIN
     SELECT  M.*
             , FROM_UNIXTIME(Creation, "%b. %D %Y (%H:%i)") AS CreationFormat
             , U.Name AS UserName
+            , U.Type AS UserType
     FROM    Messages AS M, Users as U
     WHERE   M.UserID = U.UserID 
             AND M.TicketID = TicketID;

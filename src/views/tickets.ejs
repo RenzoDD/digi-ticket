@@ -83,12 +83,12 @@
 					<% for (var ticket of tickets) { %>
 					<tr>
 						<th class="align-middle"><%- ticket.TicketID %></th>
-						<td class="align-middle"><%- ticket.LastDateFormat %></td>
+						<td class="align-middle"><%- ticket.StatusDateFormat %></td>
 						<td class="align-middle"><%- ticket.DeparmentName %></td>
 						<td class="align-middle"><%- ticket.Subject %></td>
 						<td class="align-middle">
-							<span class="badge text-bg-<%- ticket.Status == 1 ? "primary" : ticket.Status == 2 ? "primary" : ticket.Status == 3 ? "success" : ticket.Status == 4 ? "warning" : ticket.Status == 5 ? "secondary" : "danger" %>">
-								<%- ticket.StatusFormat %>
+							<span class="badge text-bg-<%- global.states["format-" + ticket.Status] %>">
+								<%- global.states[ticket.Status] %>
 							</span>
 						</td>
 						<td class="align-middle">
