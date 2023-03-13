@@ -31,6 +31,10 @@ router.post('/login', async function (req, res) {
     req.session.user = user[0];
     return res.redirect('/');
 });
+router.get('/logout', async function (req, res) {
+    delete req.session.user;
+    return res.redirect('/login');
+});
 
 // Tickets
 router.get('/tickets', async function (req, res) {
