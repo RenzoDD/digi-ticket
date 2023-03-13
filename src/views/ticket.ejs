@@ -19,12 +19,10 @@
 
 	<main class="container mt-5">
 		<h1 class="fw-bold text-center">
-			<i class="bi bi-ticket-perforated"></i>
 			Ticket # <%- ticket.TicketID %>
-			<i class="bi bi-ticket-perforated"></i>
 		</h1>
 
-		<% if (session.user.Type === 3) { %>
+		<% if (session.user.Type === global.types.Admin) { %>
 		<div class="row">
 			<div class="col-md-6">
 				<label>Assign to employee</label>
@@ -153,7 +151,7 @@
 							</div>
 						</div>
 					</div>
-					<% } else if (session.user.Type === 1 && ticket.Status === global.states.Closed) { %>
+					<% } else if (session.user.Type === global.types.User && ticket.Status === global.states.Closed) { %>
 					<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#rate">
 						<i class="bi bi-star-half"></i> Rate service
 					</button>
@@ -200,7 +198,7 @@
 			<div class="col-sm-8 mb-3">
 				<div class="row justify-content-center">
 					<% for (var message of messages) { %>
-					<div class="alert alert-<% if(message.UserID === session.user.UserID) { %>light<% } else if (message.UserID !== session.user.UserID && message.UserType !== 1) { %>primary<% } else { %>success<% } %>">
+					<div class="alert alert-<% if(message.UserID === session.user.UserID) { %>light<% } else if (message.UserID !== session.user.UserID && message.UserType !== global.types.User) { %>primary<% } else { %>success<% } %>">
 						<div class="row mb-3 fw-bold">
 							<div class="col-md-6 text-start">
 								<i class="bi bi-person"></i> <%- message.UserName %>
@@ -224,7 +222,7 @@
 
 	<script src="/vendor/bootstrap.js"></script>
 
-	<% if (session.user.Type === 1 && ticket.Status === global.states.Closed && ticket.Satisfaction == null) { %>
+	<% if (session.user.Type === global.types.User && ticket.Status === global.states.Closed && ticket.Satisfaction == null) { %>
 	<script>
 		var myModal = new bootstrap.Modal(document.getElementById('rate'), {
 			keyboard: false

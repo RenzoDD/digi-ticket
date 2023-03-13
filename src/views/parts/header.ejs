@@ -17,7 +17,7 @@
                     <a class="nav-link <%- code == "/login" ? "active" : "" %>" href="/login"><i class="bi bi-door-open"></i> Login</a>
                 </li>
                 <% } else {%>
-                    <% if (session.user.Type === 3) { %>
+                    <% if (session.user.Type === global.types.Admin) { %>
                     <li class="nav-item">
                         <a class="nav-link <%- code == "/assign" ? "active" : "" %>" href="/assign"><i class="bi bi-person-up"></i> Assign</a>
                     </li>

@@ -8,6 +8,10 @@ global.states = {
     1: "Created", 2: "Assigned", 3: "Aswered", 4: "Replied", 5: "Closed",
     "Created": 1, "Assigned": 2, "Aswered": 3, "Replied": 4, "Closed": 5
 }
+global.types = {
+    1: "User", 2: "Employee", 3: "Admin", 4: "Managment",
+    "User": 1, "Employee": 2, "Admin": 3, "Managment": 4
+}
 
 // Home
 router.get('/', async function (req, res) {
@@ -39,12 +43,12 @@ router.get('/logout', async function (req, res) {
 router.get('/tickets', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
-    if (req.session.user.Type === 1) {
+    if (req.session.user.Type === global.types.User) {
         var deparments = await MySQL.Query("CALL Deparments_Read_All()");
         var tickets = await MySQL.Query("CALL Tickets_Read_ClientID(?)", [req.session.user.UserID]);
-    } else if (req.session.user.Type === 2) {
+    } else if (req.session.user.Type === global.types.Employee) {
         var tickets = await MySQL.Query("CALL Tickets_Read_SupportID(?)", [req.session.user.UserID]);
-    } else if (req.session.user.Type === 3) {
+    } else if (req.session.user.Type === global.types.Admin) {
         var tickets = await MySQL.Query("CALL Tickets_Read_Assigned_DeparmentID(?)", [req.session.user.DeparmentID]);
     }
     return res.render("tickets", { code: "/tickets", title: "Ticket's list", session: req.session, deparments, tickets });
@@ -53,7 +57,7 @@ router.get('/tickets', async function (req, res) {
 router.post('/create', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
-    if (req.session.user.Type !== 1)
+    if (req.session.user.Type !== global.types.User)
         return res.redirect("/");
 
     var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [req.session.user.UserID, req.body.deparment, req.body.subject]);
@@ -96,7 +100,7 @@ router.post('/answer', async function (req, res) {
 
     await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
 
-    if (req.session.user.Type === 1) {
+    if (req.session.user.Type === global.types.User) {
         if (ticket.Status !== global.states.Created && ticket.Status !== global.states.Assigned)
             await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Replied])
     } else
@@ -139,7 +143,7 @@ router.post('/rate', async function (req, res) {
 router.get('/assign', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
-    if (req.session.user.Type !== 3)
+    if (req.session.user.Type !== global.types.Admin)
         return res.redirect("/");
 
     var tickets = await MySQL.Query("CALL Tickets_Read_Unassigned_DeparmentID(?)", [req.session.user.DeparmentID]);
@@ -150,7 +154,7 @@ router.get('/assign', async function (req, res) {
 router.post('/assign', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
-    if (req.session.user.Type !== 3)
+    if (req.session.user.Type !== global.types.Admin)
         return res.redirect("/");
 
     var ticket = await MySQL.Query("CALL Tickets_Read_TicketID(?)", [req.body.ticket])
@@ -165,12 +169,17 @@ router.post('/assign', async function (req, res) {
 router.post('/deparment', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/login");
-    if (req.session.user.Type !== 3)
+    if (req.session.user.Type !== global.types.Admin)
         return res.redirect("/");
 
     await MySQL.Query("CALL Tickets_Update_DeparmentID(?,?)", [req.body.ticket, req.body.deparment]);
 
     return res.redirect("/tickets");
+});
+
+// Service reports
+router.get('/reports', async function (req, res) {
+
 });
 
 module.exports = router;
