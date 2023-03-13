@@ -38,5 +38,6 @@ BEGIN
             , U.Type AS UserType
     FROM    Messages AS M, Users as U
     WHERE   M.UserID = U.UserID 
-            AND M.TicketID = TicketID;
+            AND M.TicketID = TicketID
+    ORDER BY M.MessageID;
 END //

@@ -5,8 +5,8 @@ const router = express.Router();
 
 global.states = {
     "format-1": "primary", "format-2": "primary", "format-3": "success", "format-4": "warning", "format-5": "secondary",
-    1: "Created", 2: "Assigned", 3: "Aswered", 4: "Replied", 5: "Solved",
-    "Created": 1, "Assigned": 2, "Aswered": 3, "Replied": 4, "Solved": 5
+    1: "Created", 2: "Assigned", 3: "Aswered", 4: "Replied", 5: "Closed",
+    "Created": 1, "Assigned": 2, "Aswered": 3, "Replied": 4, "Closed": 5
 }
 
 // Home
@@ -85,6 +85,15 @@ router.post('/answer', async function (req, res) {
         await MySQL.Query("CALL Tickets_Update_Status(?,?)", [req.body.ticket, global.states.Replied])
     else
         await MySQL.Query("CALL Tickets_Update_Status(?,?)", [req.body.ticket, global.states.Aswered])
+
+    return res.redirect("/ticket/" + req.body.ticket);
+});
+// Close ticket
+router.post('/close', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+
+    await MySQL.Query("CALL Tickets_Update_Status(?,?)", [req.body.ticket, global.states.Closed])
 
     return res.redirect("/ticket/" + req.body.ticket);
 });
