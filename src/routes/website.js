@@ -11,8 +11,7 @@ global.states = {
 
 // Home
 router.get('/', async function (req, res) {
-    var { motd } = require('../settings.json');
-    res.render("home", { code: "/home", session: req.session, motd });
+    res.render("home", { code: "/home", session: req.session });
 });
 
 // Login
