@@ -21,6 +21,36 @@
 		<h1 class="fw-bold text-center">
 			Service reports
 		</h1>
+		<h2>
+			Personal report
+		</h2>
+		<div class="row justify-content-center">
+			<div class="col-md-3">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Tickets assigned</h5>
+						<h3 class="fw-bold text-center mb-0"><%- Quantity || 0 %></h3>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Open tickets</h5>
+						<h3 class="fw-bold text-center mb-0"><%- Open || 0 %></h3>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Avg. Satisfaction</h5>
+						<h3 class="fw-bold text-center mb-0"><%- Satisfaction || "N/A" %></h3>
+					</div>
+				</div>
+			</div>
+		</div>
+
 	</main>
 
 	<%- include('./parts/footer') %>

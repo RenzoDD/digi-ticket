@@ -179,7 +179,21 @@ router.post('/deparment', async function (req, res) {
 
 // Service reports
 router.get('/reports', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/login");
+    if (req.session.user.Type !== global.types.Admin && req.session.user.Type !== global.types.Employee)
+        return res.redirect("/");
 
+    var data = await MySQL.Query("CALL Reports_Tickets_Quantity(?)", [req.session.user.UserID]);
+    var { Quantity } = data[0];
+
+    var data = await MySQL.Query("CALL Reports_Tickets_Open(?)", [req.session.user.UserID]);
+    var { Open } = data[0];
+
+    var data = await MySQL.Query("CALL Reports_Tickets_Satisfaction(?)", [req.session.user.UserID]);
+    var { Satisfaction } = data[0];
+
+    return res.render('reports', { code: "/reports", session: req.session, Quantity, Open, Satisfaction });
 });
 
 module.exports = router;

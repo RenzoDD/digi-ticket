@@ -10,7 +10,7 @@ CREATE TABLE Tickets (
     DeparmentID     INTEGER     NOT NULL,                   -- Ticket's deparment
 
     Subject         VARCHAR(256) NOT NULL,                  -- Ticket's title                          (by team) (by client)
-    Status          INTEGER      NOT NULL   DEFAULT 1,      -- Ticket's status (1-created, 2-assigned, 3-aswered, 4-replied , 5-solved)
+    Status          INTEGER      NOT NULL   DEFAULT 1,      -- Ticket's status (1-created, 2-assigned, 3-aswered, 4-replied , 5-closed)
     StatusDate      INTEGER      NOT NULL,                  -- Last update date
     Satisfaction    INTEGER,                                -- Satisfaction level
     Creation        INTEGER      NOT NULL,                  -- Creation time
