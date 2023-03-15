@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="/vendor/bootstrap.css">
+	<link rel="stylesheet" href="/vendor/bootstrap-icons.css">
+
+	<link rel="stylesheet" href="/css/style.css">
+
+	<link rel="shortcut icon" href="/img/logo.png" type="image/x-icon">
+	<title>Digi-Ticket Helpdesk - <%- title %></title>
+</head>
+
+<body class="d-flex flex-column h-100">
+	<%- include('./parts/header') %>
+
+	<main class="container mt-5">
+		<h1 class="fw-bold text-center">
+			<%- title %>
+		</h1>
+
+		<% if (session.user.Type === global.types.User) { %>
+		<div class="mb-3 text-end">
+			<button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#create">
+				<i class="bi bi-plus-circle"></i> Create ticket
+			</button>
+		</div>
+		<div class="modal fade" id="create" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<form action="/create" method="post">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5">
+								<i class="bi bi-plus-circle"></i> Create ticket
+							</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<div class="modal-body">
+							<div class="mb-3">
+								<label class="form-label">Deparment</label>
+								<select class="form-select" name="deparment">
+									<option value="null" selected>Select deparment</option>
+									<% for (var deparment of deparments) { %>
+									<option value="<%- deparment.DeparmentID %>"><%- deparment.Name %></option>
+									<% } %>
+								</select>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Subject</label>
+								<input type="text" class="form-control" name="subject">
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Message</label>
+								<textarea class="form-control" rows="3" name="message"></textarea>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-sm btn-success">Create</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<% } %>
+
+		<div class="table-responsive">
+			<table class="table table-hover table-striped">
+				<thead>
+					<tr>
+						<th scope="col">#</th>
+						<th scope="col">Date</th>
+						<th scope="col">Deparment</th>
+						<th scope="col">Subject</th>
+						<th scope="col">Status</th>
+						<th scope="col"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<% for (var ticket of tickets) { %>
+					<tr>
+						<th class="align-middle"><%- ticket.TicketID %></th>
+						<td class="align-middle"><%- ticket.StatusDateFormat %></td>
+						<td class="align-middle"><%- ticket.DeparmentName %></td>
+						<td class="align-middle"><%- ticket.Subject %></td>
+						<td class="align-middle">
+							<span class="badge text-bg-<%- global.states["format-" + ticket.Status] %>">
+								<%- global.states[ticket.Status] %>
+							</span>
+						</td>
+						<td class="align-middle">
+							<a class="btn btn-sm" href="/ticket/<%- ticket.TicketID %>"><i class="bi bi-search"></i></a>
+						</td>
+					</tr>
+					<% } %>
+				</tbody>
+			</table>
+		</div>
+	</main>
+
+	<%- include('./parts/footer') %>
+
+	<script src="/vendor/bootstrap.js"></script>
+</body>
+
+</html>

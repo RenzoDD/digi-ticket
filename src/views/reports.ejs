@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="/vendor/bootstrap.css">
+	<link rel="stylesheet" href="/vendor/bootstrap-icons.css">
+
+	<link rel="stylesheet" href="/css/style.css">
+
+	<link rel="shortcut icon" href="/img/logo.png" type="image/x-icon">
+	<title>Digi-Ticket Helpdesk - Reports</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+	<%- include('./parts/header') %>
+
+	<main class="container mt-5">
+		<h1 class="fw-bold text-center">
+			Service reports
+		</h1>
+		<h2>
+			Personal report
+		</h2>
+		<div class="row justify-content-center">
+			<div class="col-md-3">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Tickets assigned</h5>
+						<h3 class="fw-bold text-center mb-0"><%- Quantity || 0 %></h3>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Open tickets</h5>
+						<h3 class="fw-bold text-center mb-0"><%- Open || 0 %></h3>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Avg. Satisfaction</h5>
+						<h3 class="fw-bold text-center mb-0"><%- Satisfaction || "N/A" %></h3>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</main>
+
+	<%- include('./parts/footer') %>
+
+	<script src="/vendor/bootstrap.js"></script>
+</body>
+
+</html>

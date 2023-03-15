@@ -1,0 +1,13 @@
+@font-face {
+    font-family: Montserrat;
+    src: url('../fonts/montserrat.woff') format('woff');
+}
+
+body {
+    font-family: Montserrat;
+    
+    background-color: #fff;
+    background-image: radial-gradient(circle, #EFEFEF 10%, transparent 10%), radial-gradient(circle, #EFEFEF 10%, transparent 10%);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+}

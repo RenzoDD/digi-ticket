@@ -1,0 +1,41 @@
+{
+    "login": {
+        "already-in": "You are alreay logged in",
+        "invalid-credentials": "Wrong user or password"
+    },
+    "tickets": {
+        "not-logged-in": "Please login to the system"
+    },
+    "create": {
+        "not-logged-in": "Please login to the system",
+        "not-user": "You must be a user to create a ticket"
+    },
+    "ticket": {
+        "not-logged-in": "Please login to the system",
+        "not-involved": "You don't have permission to see this ticket"
+    },
+    "answer": {
+        "not-logged-in": "Please login to the system",
+        "not-involved": "You don't have permission to answer this ticket"
+    },
+    "close": {
+        "not-logged-in": "Please login to the system",
+        "not-involved": "You don't have permission to close this ticket"
+    },
+    "rate": {
+        "not-logged-in": "Please login to the system",
+        "not-involved": "You don't have permission to rate this ticket"
+    },
+    "assign": {
+        "not-logged-in": "Please login to the system",
+        "not-involved": "You don't have permission to assign this ticket"
+    },
+    "deparment": {
+        "not-logged-in": "Please login to the system",
+        "not-involved": "You don't have permission to assign this ticket's deparment"
+    },
+    "reports": {
+        "not-logged-in": "Please login to the system",
+        "not-involved": "You don't have permission to see this reports"
+    }
+}

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="/vendor/bootstrap.css">
+	<link rel="stylesheet" href="/vendor/bootstrap-icons.css">
+
+	<link rel="stylesheet" href="/css/style.css">
+
+	<link rel="shortcut icon" href="/img/logo.png" type="image/x-icon">
+	<title>Digi-Ticket Helpdesk - Ticket # <%- ticket.TicketID %></title>
+</head>
+
+<body class="d-flex flex-column h-100">
+	<%- include('./parts/header') %>
+
+	<main class="container mt-5">
+		<h1 class="fw-bold text-center">
+			Ticket # <%- ticket.TicketID %>
+		</h1>
+
+		<% if (session.user.Type === global.types.Admin) { %>
+		<div class="row">
+			<div class="col-md-6">
+				<label>Assign to employee</label>
+				<form class="input-group mb-3" method="post" action="/assign">
+					<select class="form-select" name="employee">
+						<option selected>Select helpdesk employee</option>
+						<% for (var employee of employees) { %>
+						<option value="<%- employee.UserID %>" <% if (employee.UserID === ticket.SupportID) { %> selected <% } %>>
+							<%- employee.Name %>
+						</option>
+						<% } %>
+					</select>
+					<input type="hidden" name="ticket" value="<%- ticket.TicketID %>">
+					<button class="btn btn-success">Assign</button>
+				</form>
+			</div>
+			<div class="col-md-6">
+				<label>Change deparment</label>
+				<form class="input-group mb-3" method="post" action="/deparment">
+					<select class="form-select" name="deparment">
+						<option selected>Select helpdesk deparment</option>
+						<% for (var deparment of deparments) { %>
+						<option value="<%- deparment.DeparmentID %>" <% if (deparment.DeparmentID === ticket.DeparmentID) { %> selected <% } %>>
+							<%- deparment.Name %>
+						</option>
+						<% } %>
+					</select>
+					<input type="hidden" name="ticket" value="<%- ticket.TicketID %>">
+					<button class="btn btn-primary">Change</button>
+				</form>
+			</div>
+		</div>
+		<% } %>
+
+
+		<div class="row">
+			<div class="col">
+				<div class="list-group mb-3">
+					<div class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto">
+							<div class="fw-bold">Deparment</div>
+							<%- ticket.DeparmentName %>
+						</div>
+					</div>
+					<div class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto">
+							<div class="fw-bold">Subject</div>
+							<%- ticket.Subject %>
+						</div>
+					</div>
+					<div class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto">
+							<div class="fw-bold">Support</div>
+							<%- ticket.SupportName || "Not assigned" %>
+						</div>
+					</div>
+					<div class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto">
+							<div class="fw-bold">Status</div>
+							<span class="badge text-bg-<%- global.states["format-" + ticket.Status] %>">
+								<%- global.states[ticket.Status] %>
+							</span>
+						</div>
+					</div>
+				</div>
+
+				<% if (session.user.UserID === ticket.ClientID || session.user.UserID === ticket.SupportID) { %>
+				<div class="mb-3">
+					<button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#answer">
+						<i class="bi bi-send"></i>
+						<% if (ticket.Status !== global.states.Closed) { %>
+						Answer ticket
+						<% } else { %>
+						Re-open ticket
+						<% } %>
+					</button>
+					<div class="modal fade" id="answer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<form action="/answer" method="post">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5">
+											<i class="bi bi-send"></i> Answer ticket
+										</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+									</div>
+									<div class="modal-body">
+										<input type="hidden" name="ticket" value="<%- ticket.TicketID %>">
+										<div class="mb-3">
+											<label class="form-label">Message</label>
+											<textarea class="form-control" rows="3" name="message"></textarea>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+										<button type="submit" class="btn btn-sm btn-success">Answer</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+
+					<% if (ticket.Status !== global.states.Closed && ticket.Status !== global.states.Created && ticket.Status !== global.states.Assigned) { %>
+					<button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#close">
+						<i class="bi bi-archive"></i> Close ticket
+					</button>
+					<div class="modal fade" id="close" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<form action="/close" method="post">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5">
+											<i class="bi bi-archive"></i> Close ticket
+										</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+									</div>
+									<div class="modal-body">
+										<input type="hidden" name="ticket" value="<%- ticket.TicketID %>">
+										<label class="form-label">Are you sure you want to close this ticket? To re-open it you only need to submit another message</label>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+										<button type="submit" class="btn btn-sm btn-danger">Close</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+					<% } else if (session.user.Type === global.types.User && ticket.Status === global.states.Closed) { %>
+					<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#rate">
+						<i class="bi bi-star-half"></i> Rate service
+					</button>
+					<div class="modal fade" id="rate" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<form action="/rate" method="post">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5">
+											<i class="bi bi-star-half"></i> Rate service
+										</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+									</div>
+									<div class="modal-body text-center">
+										<input type="hidden" name="ticket" value="<%- ticket.TicketID %>">
+										<input type="range" class="form-range" name="points" min="1" max="5" id="points" oninput="update()" value="<%- ticket.Satisfaction || 3 %>">
+										<label id="text"></label>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+										<button type="submit" class="btn btn-sm btn-primary">Rate</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+					<script>
+						function update() {
+							var points = document.getElementById('points');
+							var text = document.getElementById('text');
+
+							if (points.value == 1) text.innerHTML = "Very dissatisfied";
+							if (points.value == 2) text.innerHTML = "Dissatisfied";
+							if (points.value == 3) text.innerHTML = "Neutral";
+							if (points.value == 4) text.innerHTML = "Satisfied";
+							if (points.value == 5) text.innerHTML = "Very satisfied";
+						}
+						update();
+					</script>
+					<% } %>
+				</div>
+				<% } %>
+			</div>
+			<div class="col-sm-8 mb-3">
+				<div class="row justify-content-center">
+					<% for (var message of messages) { %>
+					<div class="alert alert-<% if(message.UserID === session.user.UserID) { %>light<% } else if (message.UserID !== session.user.UserID && message.UserType !== global.types.User) { %>primary<% } else { %>success<% } %>">
+						<div class="row mb-3 fw-bold">
+							<div class="col-md-6 text-start">
+								<i class="bi bi-person"></i> <%- message.UserName %>
+							</div>
+							<div class="col-md-6 text-end">
+								<i class="bi bi-calendar4-event"></i> <%- message.CreationFormat %>
+							</div>
+						</div>
+						<hr>
+						<div class="">
+							<%- message.Text %>
+						</div>
+					</div>
+					<% } %>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<%- include('./parts/footer') %>
+
+	<script src="/vendor/bootstrap.js"></script>
+
+	<% if (session.user.Type === global.types.User && ticket.Status === global.states.Closed && ticket.Satisfaction == null) { %>
+	<script>
+		var myModal = new bootstrap.Modal(document.getElementById('rate'), {
+			keyboard: false
+		});
+
+		myModal.show();
+	</script>
+	<% } %>
+</body>
+
+</html>

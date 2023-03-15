@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="/vendor/bootstrap.css">
+	<link rel="stylesheet" href="/vendor/bootstrap-icons.css">
+
+	<link rel="stylesheet" href="/css/style.css">
+
+	<link rel="shortcut icon" href="/img/logo.png" type="image/x-icon">
+	<title>Digi-Ticket Helpdesk</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+	<%- include('./parts/header') %>
+
+	<main class="container mt-5">
+		<div class="row justify-content-center mb-3">
+			<div class="col-lg-6 col-md-8 my-auto">
+				<div class="alert alert-primary" role="alert">
+					<h4 class="alert-heading"><i class="bi bi-emoji-laughing-fill"></i> Hello and welcome</h4>
+					<div class="row">
+						<div class="col-md-8">
+							<p>
+								This is a helpdesk system. It implements the main flow of user support and offers 3 different user roles: "client", "employee" and "admin".
+							</p>
+							<p>
+								This is a public open-source project, feel free to analyze the repo to understand how this project work!
+							</p>
+						</div>
+						<div class="col-md-4">
+							<img src="/img/logo.png" class="img-fluid mx-auto d-block">
+						</div>
+					</div>
+
+					<hr>
+					<p class="mb-0 text-center">
+						Fork the repo from <i class="bi bi-github"></i>
+						<a href="https://github.com/RenzoDD/digi-ticket" target="_blank" class="alert-link">GitHub</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<%- include('./parts/footer') %>
+
+	<script src="/vendor/bootstrap.js"></script>
+</body>
+
+</html>
