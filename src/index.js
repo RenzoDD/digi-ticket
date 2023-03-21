@@ -42,6 +42,7 @@ app.use(session({
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views')
 
+app.use('/bot', require('./routes/bot'));
 app.use('/', require('./routes/website'));
 
 app.all('/error/:page/:name', async function (req, res) {

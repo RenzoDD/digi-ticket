@@ -35,6 +35,14 @@ BEGIN
             AND T.Creation = @unix;
 END //
 
+DROP PROCEDURE IF EXISTS Tickets_Read_Status //
+CREATE PROCEDURE Tickets_Read_Status ( IN Status INTEGER )
+BEGIN
+    SELECT  COUNT(T.TicketID) AS Quantity
+    FROM    Tickets AS T
+    WHERE   T.Status = Status;
+END //
+
 DROP PROCEDURE IF EXISTS Tickets_Read_ClientID //
 CREATE PROCEDURE Tickets_Read_ClientID ( IN ClientID INTEGER )
 BEGIN

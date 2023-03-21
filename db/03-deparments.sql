@@ -18,3 +18,11 @@ BEGIN
     SELECT  D.*
     FROM    Deparments AS D;
 END //
+
+DROP PROCEDURE IF EXISTS Deparments_Read_DeparmentID //
+CREATE PROCEDURE Deparments_Read_DeparmentID ( IN DeparmentID INTEGER )
+BEGIN
+    SELECT  D.*
+    FROM    Deparments AS D
+    WHERE   D.DeparmentID = DeparmentID;
+END //
