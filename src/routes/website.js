@@ -64,9 +64,9 @@ router.post('/create', async function (req, res) {
 
     var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [req.session.user.UserID, req.body.deparment, req.body.subject]);
     ticket = ticket[0];
-    
+
     await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
-    
+
     return res.redirect("/tickets");
 });
 
@@ -199,6 +199,41 @@ router.get('/reports', async function (req, res) {
     var { Satisfaction } = data[0];
 
     return res.render('reports', { code: "/reports", session: req.session, Quantity, Open, Satisfaction });
+});
+
+router.get('/account', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/error/reports/not-logged-in");
+    return res.render('account', { code: "/account", session: req.session })
+});
+router.post('/telegram', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/error/telegram/not-logged-in");
+    if (req.session.user.Type !== global.types.User)
+        return res.redirect("/error/telegram/only-users");
+
+    var user = await MySQL.Query("CALL Users_Read_UserID(?)", [req.session.user.UserID]);
+    user = user[0];
+
+    if (user.Telegram)
+        return res.redirect("/error/telegram/already-connected");
+
+    var telegram = await MySQL.Query("CALL Telegram_Read_Token(?)", [req.body.code]);
+    if (telegram.length === 0)
+        return res.redirect("/error/telegram/code-not-found");
+    telegram = telegram[0];
+
+    var user = await MySQL.Query("CALL Users_Update_Telegram(?,?)", [req.session.user.UserID, telegram.TelegramID]);
+    req.session.user = user[0];
+
+    if (!req.session.user.TelegramID)
+        return res.redirect("/error/telegram/db-error");
+
+    const TelegramBot = require('node-telegram-bot-api');
+    const bot = new TelegramBot(process.env.TELEGRAM);
+    bot.sendMessage(req.session.user.TelegramID, `This user has been connected to ${req.session.user.Name} account. If this is a mistake contact DigiTicket support. To start chatting send /start.`);
+
+    return res.redirect("/account");
 });
 
 module.exports = router;

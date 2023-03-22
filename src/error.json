@@ -37,5 +37,12 @@
     "reports": {
         "not-logged-in": "Please login to the system",
         "not-involved": "You don't have permission to see this reports"
+    },
+    "telegram": {
+        "not-logged-in": "Please login to the system",
+        "only-users": "This feature is only for users, not employees or admin",
+        "already-connected": "You already have a Telegram account connected",
+        "code-not-found": "The code you provided is invalid",
+        "db-error": "There was an error, please try again"
     }
 }

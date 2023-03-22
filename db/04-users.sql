@@ -50,12 +50,32 @@ BEGIN
             AND U.DeparmentID = DeparmentID;
 END //
 
+DROP PROCEDURE IF EXISTS Users_Read_UserID //
+CREATE PROCEDURE Users_Read_UserID ( IN UserID INTEGER )
+BEGIN
+    SELECT  U.*
+    FROM    Users AS U
+    WHERE   U.UserID = UserID;
+END //
+
 DROP PROCEDURE IF EXISTS Users_Read_TelegramID //
 CREATE PROCEDURE Users_Read_TelegramID ( IN TelegramID BIGINT )
 BEGIN
     SELECT  U.*
     FROM    Users AS U
     WHERE   U.TelegramID = TelegramID;
+END //
+
+DROP PROCEDURE IF EXISTS Users_Update_Telegram //
+CREATE PROCEDURE Users_Update_Telegram ( IN UserID INTEGER, IN TelegramID BIGINT )
+BEGIN
+    UPDATE  Users AS U
+    SET     U.TelegramID = TelegramID
+    WHERE   U.UserID = UserID;
+    
+    SELECT  U.*
+    FROM    Users AS U
+    WHERE   U.UserID = UserID;
 END //
 
 CALL Users_Create(1, null, "Renzo Diaz", "renzo@remadi.net", "1234") //

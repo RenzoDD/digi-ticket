@@ -31,6 +31,14 @@ BEGIN
     WHERE   T.TelegramID = TelegramID;
 END //
 
+DROP PROCEDURE IF EXISTS Telegram_Read_Token //
+CREATE PROCEDURE Telegram_Read_Token ( IN Token INTEGER )
+BEGIN
+    SELECT  T.*
+    FROM    Telegram AS T
+    WHERE   T.Token = Token;
+END //
+
 DROP PROCEDURE IF EXISTS Telegram_Update_Information //
 CREATE PROCEDURE Telegram_Update_Information ( IN TelegramID BIGINT, IN Information TEXT )
 BEGIN
