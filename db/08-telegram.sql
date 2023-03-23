@@ -3,7 +3,7 @@ DELIMITER //
 DROP TABLE IF EXISTS Telegram //
 CREATE TABLE Telegram (
     TelegramID      BIGINT      NOT NULL,
-    Information     TEXT        DEFAULT "{}",
+    Information     TEXT,
     Token           VARCHAR(6),
 
     PRIMARY KEY (TelegramID)
@@ -22,8 +22,8 @@ BEGIN
     IF ISNULL(@id) THEN
         SET @token = Nonce(6);
 
-        INSERT INTO Telegram (TelegramID, Token)
-        VALUES (TelegramID, @token);
+        INSERT INTO Telegram (TelegramID, Information, Token)
+        VALUES (TelegramID, "{}", @token);
     END IF;
 
     SELECT  T.*
@@ -32,7 +32,7 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS Telegram_Read_Token //
-CREATE PROCEDURE Telegram_Read_Token ( IN Token INTEGER )
+CREATE PROCEDURE Telegram_Read_Token ( IN Token VARCHAR(6) )
 BEGIN
     SELECT  T.*
     FROM    Telegram AS T

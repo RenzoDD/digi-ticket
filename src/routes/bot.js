@@ -15,11 +15,11 @@ async function LinearStateBot(message, data) {
     var user = await MySQL.Query("CALL Users_Read_TelegramID(?)", [TelegramID]);
 
     if (user.length != 1)
-        return bot.sendMessage(TelegramID, `Hello. We don't have your account registered. Please login and link your Telegram account with this code: '${telegram.Token}'.\nhttps://example.com/login`);
+        return bot.sendMessage(TelegramID, `Hello. We don't have your account registered. Please login and link your Telegram account with this code: '${telegram.Token}'.\nhttps://digiticket.net.pe/login`);
     user = user[0];
 
     if (user.Type != 1)
-        return bot.sendMessage(TelegramID, `This channel is only for clients. Please, login to manage the system.\nhttps://example.com/login`);
+        return bot.sendMessage(TelegramID, `This channel is only for clients. Please, login to manage the system.\nhttps://digiticket.net.pe/login`);
 
     var Information = JSON.parse(telegram.Information);
 

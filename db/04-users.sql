@@ -79,6 +79,7 @@ BEGIN
 END //
 
 CALL Users_Create(1, null, "Renzo Diaz", "renzo@remadi.net", "1234") //
+CALL Users_Create(1, null, "Ridchard Copaja", "richard@remadi.net", "1234") //
 CALL Users_Create(2, 1, "John Yengle", "john@remadi.net", "password") //
 CALL Users_Create(2, 2, "Carlos Colina", "carlos@remadi.net", "hola") //
 CALL Users_Create(3, 1, "Andres Mares", "andres@remadi.net", "abc123") //

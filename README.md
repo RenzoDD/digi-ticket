@@ -5,8 +5,10 @@ Blockchain-based help-desk management system.
 ## Technologies 🛠️
 
 * [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) - Programing Language
-* [NodeJS v18.9.1](https://nodejs.org/) - Platform
+* [NodeJS v18.9.1](https://nodejs.org/) - Devellopment Platform
 * [MySQL v8.0.31](https://dev.mysql.com/doc/) - Relational database MySQL
+* [Telegram API](https://core.telegram.org/) - Chatbot
+* [DigiByte v7.17.3](https://core.telegram.org/) - Blockchain
 
 ## Authors ✒️
 
@@ -16,12 +18,14 @@ Blockchain-based help-desk management system.
 ## Environment Variables 📄
 
 ```bash
-NODE_ENV=develop
+NODE_ENV="development"
 
 PORT=80
 
-DB_HOST=localhost
-DB_NAME=digiticket
-DB_USER=root
-DB_PASS=
+DB_HOST="localhost"
+DB_NAME="digiticket"
+DB_USER="root"
+DB_PASS=""
+
+TELEGRAM=""
 ```
