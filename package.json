@@ -4,7 +4,7 @@
   "description": "Blockchain-based help-desk management system",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon src/index.js"
+    "start": "node src/index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/RenzoDD/digi-ticket#readme",
   "dependencies": {
+    "digibyte-js": "^1.4.4",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",

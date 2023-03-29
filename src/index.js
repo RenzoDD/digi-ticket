@@ -26,6 +26,7 @@ console.log = function () {
     fs.appendFileSync("./logs/" + date + ".log", datetime + ": " + text);
 };
 
+const HDPrivateKey = require('digibyte-js/lib/hdprivatekey');
 const express = require('express');
 const app = express();
 const session = require('express-session');
@@ -58,5 +59,6 @@ app.listen(process.env.PORT, async function () {
     console.log(`--------------- Starting server ---------------`);
     console.log(`Time: ${new Date}`);
     console.log(`Environment: ${process.env.NODE_ENV}`);
+    console.log(`Address: ${new HDPrivateKey(process.env.XPRV).derive(`${process.env.HDER}/0/0`).privateKey.toAddress().toString()}`);
     console.log(`-----------------------------------------------`);
 });
