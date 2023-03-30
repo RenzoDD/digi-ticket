@@ -1,11 +1,5 @@
 const MySQL = require('../utilities/mysql');
-const BackUp = require('../utilities/backup');
-
-const DigiByte = require('digibyte-js');
-const HDPrivateKey = require('digibyte-js/lib/hdprivatekey');
-const Script = require('digibyte-js/lib/script/script');
-const Transaction = require('digibyte-js/lib/transaction/transaction');
-const Explorer = require('digibyte-js/lib/explorer');
+const { SaveTicket, SaveMessage } = require('../utilities/blockchain');
 
 const express = require('express');
 const router = express.Router();
@@ -130,84 +124,11 @@ async function LinearStateBot(message, data) {
 
             var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [user.UserID, Information.DeparmentID, Information.Subject]);
             ticket = ticket[0];
-
-            /* Secure ticket start */
-            var hdPrivateKey = new HDPrivateKey(process.env.XPRV);
-
-            var gPrivateKey = hdPrivateKey.derive(`${process.env.HDER}/0/0`).privateKey;
-            var gAddress = gPrivateKey.toAddress().toString();
-
-            var ePrivateKey = hdPrivateKey.derive(`${process.env.HDER}/0/${ticket.TicketID}`).privateKey;
-            var eAddress = ePrivateKey.toAddress().toString();
-            console.log(`Generated eAddress: ${eAddress}`)
-
-            var fTicket = BackUp.FormatTicket(ticket);
-            var hTicket = BackUp.SHA256(fTicket);
-            console.log(`Generated object: ${JSON.stringify(fTicket)}`)
-            console.log(`Generated hash: ${hTicket.toString('hex')}`)
-
-            var UTXOs = await BackUp.GetUTXOs(gAddress);
-
-            var tx = new Transaction()
-                .from(UTXOs)
-                .to(eAddress, 600)
-                .addData(hTicket)
-                .change(gAddress)
-                .sign(gPrivateKey);
-
-            var hex = tx.serialize(true);
-
-            var explorer = new Explorer(process.env.EXPLORER);
-            for (var i = 0; i < 10; i++) {
-                var data = await explorer.sendtx(hex);
-                if (data.error) console.log(data.error);
-                else break;
-            }
-
-            if (data.result) {
-                console.log(`Broadcasted TX: ${data.result}`)
-
-                BackUp.SaveUTXOs(eAddress, { txid: data.result, vout: 0, satoshis: 600, scriptPubKey: Script.fromAddress(eAddress).toHex() })
-                BackUp.SaveUTXOs(gAddress, { txid: data.result, vout: 2, satoshis: tx.getChangeOutput().satoshis, scriptPubKey: Script.fromAddress(gAddress).toHex() })
-            }
-            /* Secure ticket end */
-
+            var txid = await SaveTicket(ticket.TicketID);
+            
             var message = await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, user.UserID, message.text]);
             message = message[0];
-
-            /* Secure message start */
-            var fMessage = BackUp.FormatMessage(message);
-            var hMessage = BackUp.SHA256(fMessage);
-            console.log(`Generated object: ${JSON.stringify(fMessage)}`)
-            console.log(`Generated hash: ${hMessage.toString('hex')}`)
-
-            var gUTXOs = await BackUp.GetUTXOs(gAddress);
-            var eUTXOs = await BackUp.GetUTXOs(eAddress);
-
-            var tx = new Transaction()
-                .from(gUTXOs)
-                .from(eUTXOs)
-                .to(eAddress, 600)
-                .addData(hMessage)
-                .change(gAddress)
-                .sign([gPrivateKey, ePrivateKey]);
-
-            var hex = tx.serialize(true);
-
-            var explorer = new Explorer(process.env.EXPLORER);
-            for (var i = 0; i < 10; i++) {
-                var data = await explorer.sendtx(hex);
-                if (data.error) console.log(data.error);
-                else break;
-            }
-
-            if (data.result) {
-                console.log(`Broadcasted TX: ${data.result}`)
-
-                BackUp.SaveUTXOs(eAddress, { txid: data.result, vout: 0, satoshis: 600, scriptPubKey: Script.fromAddress(eAddress).toHex() })
-                BackUp.SaveUTXOs(gAddress, { txid: data.result, vout: 2, satoshis: tx.getChangeOutput().satoshis, scriptPubKey: Script.fromAddress(gAddress).toHex() })
-            }
-            /* Secure message end */
+            var txid = await SaveMessage(message.MessageID);
 
             Information = {};
             Information.status = "resting";

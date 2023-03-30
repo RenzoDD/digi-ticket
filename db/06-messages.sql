@@ -41,3 +41,11 @@ BEGIN
             AND M.TicketID = TicketID
     ORDER BY M.MessageID;
 END //
+
+DROP PROCEDURE IF EXISTS Messages_Read_MessageID //
+CREATE PROCEDURE Messages_Read_MessageID ( IN MessageID INTEGER )
+BEGIN
+    SELECT  M.*
+    FROM    Messages AS M
+    WHERE   M.MessageID = MessageID;
+END //
