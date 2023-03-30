@@ -1,7 +1,8 @@
 const crypto = require('crypto');
 const fs = require('fs');
 
-const MySQL = require('./mysql')
+const MySQL = require('./mysql');
+
 
 const DigiByte = require('digibyte-js');
 const HDPrivateKey = require('digibyte-js/lib/hdprivatekey');
@@ -42,6 +43,21 @@ function GetWallet(n) {
     var address = privateKey.toAddress().toString();
 
     return { wif: privateKey.toWIF(), address };
+}
+
+async function SaveIPFS(data) {
+    const ipfsClient = await import('ipfs-http-client');
+    const client = ipfsClient.create({
+        host: 'ipfs.infura.io',
+        port: 5001,
+        protocol: 'https',
+        headers: {
+            authorization: 'Basic ' + Buffer.from(`${process.env.UIPFS}:${process.env.KIPFS}`).toString('base64')
+        }
+    });
+    
+    var result = await client.add(JSON.stringify(data), { rawLeaves: true });
+    return result.cid;
 }
 
 async function SaveTicket(TicketID) {
@@ -92,6 +108,9 @@ async function SaveTicket(TicketID) {
 
         SaveUTXOs(eAddress, [{ txid: data.result, vout: 0, satoshis: 600, scriptPubKey: Script.fromAddress(eAddress).toHex() }]);
         SaveUTXOs(gAddress, [{ txid: data.result, vout: 2, satoshis: tx.getChangeOutput().satoshis, scriptPubKey: Script.fromAddress(gAddress).toHex() }]);
+
+        var cid = await SaveIPFS(ticket);
+        console.log(`Saved on IPFS: ${cid}`);
 
         return data.result;
     } catch (e) {
@@ -151,6 +170,10 @@ async function SaveMessage(MessageID) {
 
         SaveUTXOs(eAddress, [{ txid: data.result, vout: 0, satoshis: 600, scriptPubKey: Script.fromAddress(eAddress).toHex() }])
         SaveUTXOs(gAddress, [{ txid: data.result, vout: 2, satoshis: tx.getChangeOutput().satoshis, scriptPubKey: Script.fromAddress(gAddress).toHex() }])
+        
+        var cid = await SaveIPFS(message);
+        console.log(`Saved on IPFS: ${cid}`);
+
         return data.result;
     } catch (e) {
         console.log("SaveMessage error");
