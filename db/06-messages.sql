@@ -10,6 +10,8 @@ CREATE TABLE Messages (
     Text        VARCHAR(2500)   NOT NULL,                   -- Message's text
     Creation    INTEGER         NOT NULL,                   -- Creation time
 	
+    TXID            VARCHAR(64),
+    
     PRIMARY KEY (MessageID),
     FOREIGN KEY (TicketID)      REFERENCES Tickets (TicketID),
     FOREIGN KEY (UserID)        REFERENCES Users (UserID)
@@ -47,5 +49,13 @@ CREATE PROCEDURE Messages_Read_MessageID ( IN MessageID INTEGER )
 BEGIN
     SELECT  M.*
     FROM    Messages AS M
+    WHERE   M.MessageID = MessageID;
+END //
+
+DROP PROCEDURE IF EXISTS Messages_Update_TXID //
+CREATE PROCEDURE Messages_Update_TXID ( IN MessageID INTEGER, IN TXID VARCHAR(64) )
+BEGIN
+    UPDATE  Messages AS M
+    SET     M.TXID = TXID
     WHERE   M.MessageID = MessageID;
 END //

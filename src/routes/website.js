@@ -66,10 +66,12 @@ router.post('/create', async function (req, res) {
     var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [req.session.user.UserID, req.body.deparment, req.body.subject]);
     ticket = ticket[0];
     var txid = await SaveTicket(ticket.TicketID);
+    if (txid) await MySQL.Query("CALL Tickets_Update_TXID(?,?)", [ticket.TicketID, txid]);
 
     var message = await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
     message = message[0];
     var txid = await SaveMessage(message.MessageID);
+    if (txid) await MySQL.Query("CALL Messages_Update_TXID(?,?)", [message.MessageID, txid]);
 
     return res.redirect("/tickets");
 });
@@ -109,6 +111,7 @@ router.post('/answer', async function (req, res) {
     var message = await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
     message = message[0];
     var txid = await SaveMessage(message.MessageID);
+    if (txid) await MySQL.Query("CALL Messages_Update_TXID(?,?)", [message.MessageID, txid]);
    
     if (req.session.user.Type === global.types.User) {
         if (ticket.Status !== global.states.Created && ticket.Status !== global.states.Assigned)

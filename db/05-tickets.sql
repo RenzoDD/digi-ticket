@@ -14,6 +14,8 @@ CREATE TABLE Tickets (
     StatusDate      INTEGER      NOT NULL,                  -- Last update date
     Satisfaction    INTEGER,                                -- Satisfaction level
     Creation        INTEGER      NOT NULL,                  -- Creation time
+
+    TXID            VARCHAR(64),
 	
     PRIMARY KEY (TicketID),
     FOREIGN KEY (ClientID)      REFERENCES Users (UserID),
@@ -134,5 +136,13 @@ BEGIN
 
     UPDATE  Tickets AS T
     SET     T.Satisfaction = Satisfaction
+    WHERE   T.TicketID = TicketID;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Update_TXID //
+CREATE PROCEDURE Tickets_Update_TXID ( IN TicketID INTEGER, IN TXID VARCHAR(64) )
+BEGIN
+    UPDATE  Tickets AS T
+    SET     T.TXID = TXID
     WHERE   T.TicketID = TicketID;
 END //

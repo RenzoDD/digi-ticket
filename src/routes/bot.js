@@ -125,10 +125,12 @@ async function LinearStateBot(message, data) {
             var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [user.UserID, Information.DeparmentID, Information.Subject]);
             ticket = ticket[0];
             var txid = await SaveTicket(ticket.TicketID);
+            if (txid) await MySQL.Query("CALL Tickets_Update_TXID(?,?)", [ticket.TicketID, txid]);
             
             var message = await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, user.UserID, message.text]);
             message = message[0];
             var txid = await SaveMessage(message.MessageID);
+            if (txid) await MySQL.Query("CALL Messages_Update_TXID(?,?)", [message.MessageID, txid]);
 
             Information = {};
             Information.status = "resting";
