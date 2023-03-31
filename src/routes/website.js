@@ -1,5 +1,5 @@
 const MySQL = require('../utilities/mysql');
-const { SaveTicket, SaveMessage } = require('../utilities/blockchain');
+const { SaveTicket, SaveMessage, GetTXs, CheckMessage, CheckTicket } = require('../utilities/blockchain');
 
 const express = require('express');
 const router = express.Router();
@@ -91,6 +91,15 @@ router.get('/ticket/:id', async function (req, res) {
     ticket = ticket[0];
 
     var messages = await MySQL.Query("CALL Messages_Read_TicketID(?)", [ticket.TicketID])
+
+    var txs = await GetTXs(ticket.TicketID);
+    var tx = txs.filter(x => x.txid == ticket.TXID);
+    ticket.Secured = CheckTicket(ticket, tx[0]);
+
+    for (var message of messages) {
+        var tx = txs.filter(x => x.txid == message.TXID);
+        message.Secured = CheckMessage(message, tx[0]);
+    }
 
     var deparments = await MySQL.Query("CALL Deparments_Read_All()")
     var employees = await MySQL.Query("CALL Users_Read_DeparmentID(?)", [req.session.user.DeparmentID])

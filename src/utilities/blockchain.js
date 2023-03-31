@@ -44,6 +44,14 @@ function GetWallet(n) {
 
     return { wif: privateKey.toWIF(), address };
 }
+async function GetTXs(TicketID) {
+    var { address } = GetWallet(TicketID);
+
+    var explorer = new Explorer(process.env.EXPLORER);
+    var data = await explorer.address(address, { details: "txs" });
+
+    return data.transactions;
+}
 
 async function SaveIPFS(data) {
     const ipfsClient = await import('ipfs-http-client');
@@ -55,7 +63,7 @@ async function SaveIPFS(data) {
             authorization: 'Basic ' + Buffer.from(`${process.env.UIPFS}:${process.env.KIPFS}`).toString('base64')
         }
     });
-    
+
     var result = await client.add(JSON.stringify(data), { rawLeaves: true });
     return result.cid;
 }
@@ -170,7 +178,7 @@ async function SaveMessage(MessageID) {
 
         SaveUTXOs(eAddress, [{ txid: data.result, vout: 0, satoshis: 600, scriptPubKey: Script.fromAddress(eAddress).toHex() }])
         SaveUTXOs(gAddress, [{ txid: data.result, vout: 2, satoshis: tx.getChangeOutput().satoshis, scriptPubKey: Script.fromAddress(gAddress).toHex() }])
-        
+
         var cid = await SaveIPFS(message);
         console.log(`Saved on IPFS: ${cid}`);
 
@@ -181,4 +189,35 @@ async function SaveMessage(MessageID) {
     }
 }
 
-module.exports = { GetWallet, SaveTicket, SaveMessage }
+function CheckTicket(ticket, tx) {
+    if (!tx) return false;
+
+    var tck = {};
+    tck.TicketID = ticket.TicketID;
+    tck.ClientID = ticket.ClientID;
+    tck.Subject = ticket.Subject;
+    tck.Creation = ticket.Creation;
+    
+    var hash = SHA256(tck).toString('hex').toUpperCase();
+    var op_return = tx.vout[1].hex.toUpperCase();
+
+    return op_return.indexOf(hash) !== -1;
+}
+
+function CheckMessage(message, tx) {
+    if (!tx) return false;
+
+    var msg = {};
+    msg.MessageID = message.MessageID;
+    msg.TicketID = message.TicketID;
+    msg.UserID = message.UserID;
+    msg.Text = message.Text;
+    msg.Creation = message.Creation;
+    
+    var hash = SHA256(msg).toString('hex').toUpperCase();
+    var op_return = tx.vout[1].hex.toUpperCase();
+
+    return op_return.indexOf(hash) !== -1;
+}
+
+module.exports = { GetWallet, GetTXs, SaveTicket, SaveMessage, CheckTicket, CheckMessage }

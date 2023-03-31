@@ -88,6 +88,11 @@
 							</span>
 						</div>
 					</div>
+					<div class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto fw-bold">
+							<%- ticket.Secured ? "<i class='bi bi-patch-check'></i> Secured by blockchain": "<i class='bi bi-patch-exclamation'></i> Integrity error" %>
+						</div>
+					</div>
 				</div>
 
 				<% if (session.user.UserID === ticket.ClientID || session.user.UserID === ticket.SupportID) { %>
@@ -209,8 +214,11 @@
 							</div>
 						</div>
 						<hr>
-						<div class="">
+						<div class="mb-3">
 							<%- message.Text %>
+						</div>
+						<div class="mb-0 fw-bold">
+							<%- message.Secured ? "<i class='bi bi-patch-check'></i> Secured by blockchain": "<i class='bi bi-patch-exclamation'></i> Integrity error" %>
 						</div>
 					</div>
 					<% } %>
