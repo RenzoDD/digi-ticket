@@ -26,7 +26,7 @@ console.log = function () {
     fs.appendFileSync("./logs/" + date + ".log", datetime + ": " + text);
 };
 
-const { GetWallet } = require('./utilities/blockchain');
+const { GetWallet, CheckIntegrity } = require('./utilities/blockchain');
 
 const express = require('express');
 const app = express();
@@ -63,3 +63,6 @@ app.listen(process.env.PORT, async function () {
     console.log(`Address: ${GetWallet(0).address}`);
     console.log(`-----------------------------------------------`);
 });
+
+setInterval(CheckIntegrity, 10 * 60 * 1000);
+CheckIntegrity()

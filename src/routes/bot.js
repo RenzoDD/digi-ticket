@@ -100,7 +100,64 @@ async function LinearStateBot(message, data) {
             if (deparment.length !== 1)
                 return bot.sendMessage(TelegramID, `Invalid deparment. Try again`);
 
+            var options = {
+                reply_markup: {
+                    inline_keyboard: [[{ text: "Notice", callback_data: "priority-1" }, { text: "Question", callback_data: "priority-2" }, { text: "Help", callback_data: "priority-3" }]]
+                }
+            };
+
             Information.DeparmentID = deparment[0].DeparmentID;
+            Information.status = "select-priority";
+            await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
+            return bot.sendMessage(TelegramID, `What is your inquery for?`, options);
+
+        case "select-priority":
+            if (data === null)
+                return bot.sendMessage(TelegramID, `Please, select one of the options above.`);
+            if (!data.startsWith("priority-"))
+                return bot.sendMessage(TelegramID, `Please, select one of the scenarios above.`);
+
+            var priority = parseInt(data.split('-')[1]);
+
+            var options = {
+                reply_markup: {
+                    inline_keyboard: [[{ text: "None", callback_data: "impact-1" }, { text: "Very low", callback_data: "impact-2" }, { text: "Low", callback_data: "impact-3" }], [{ text: "High", callback_data: "impact-4" }, { text: "Very high", callback_data: "impact-5" }]]
+                }
+            };
+
+            Information.Priority = priority;
+            Information.status = "select-impact";
+            await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
+            return bot.sendMessage(TelegramID, `What's the level of impact on your business operations?`, options);
+
+        case "select-impact":
+            if (data === null)
+                return bot.sendMessage(TelegramID, `Please, select one of the options above.`);
+            if (!data.startsWith("impact-"))
+                return bot.sendMessage(TelegramID, `Please, select one of the scenarios above.`);
+
+            var impact = parseInt(data.split('-')[1]);
+
+            var options = {
+                reply_markup: {
+                    inline_keyboard:  [[{ text: "None", callback_data: "downtime-0" }, { text: "1 hour or less", callback_data: "downtime-1" }, { text: "2 hours", callback_data: "downtime-2" }], [{ text: "3 hours", callback_data: "downtime-3" }, { text: "4 hours", callback_data: "downtime-4" }, { text: "More", callback_data: "downtime-5" }]]
+                }
+            };
+
+            Information.Impact = impact;
+            Information.status = "select-downtime";
+            await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
+            return bot.sendMessage(TelegramID, `If your business has been interrupted. What's your downtime?`, options);
+
+        case "select-downtime":
+            if (data === null)
+                return bot.sendMessage(TelegramID, `Please, select one of the options above.`);
+            if (!data.startsWith("downtime-"))
+                return bot.sendMessage(TelegramID, `Please, select one of the options above.`);
+
+            var downtime = parseInt(data.split('-')[1]);
+
+            Information.Downtime = downtime;
             Information.status = "tell-subject";
             await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
             return bot.sendMessage(TelegramID, `In a single sentence. What's your issue/request?`);
@@ -122,11 +179,11 @@ async function LinearStateBot(message, data) {
             if (message.text.length <= 10)
                 return bot.sendMessage(TelegramID, `Your response must be a little bit longer`);
 
-            var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [user.UserID, Information.DeparmentID, Information.Subject]);
+            var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?,?,?,?)", [user.UserID, Information.DeparmentID, Information.Impact, Information.Downtime, Information.Priority, Information.Subject]);
             ticket = ticket[0];
             var txid = await SaveTicket(ticket.TicketID);
             if (txid) await MySQL.Query("CALL Tickets_Update_TXID(?,?)", [ticket.TicketID, txid]);
-            
+
             var message = await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, user.UserID, message.text]);
             message = message[0];
             var txid = await SaveMessage(message.MessageID);

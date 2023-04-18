@@ -63,7 +63,7 @@ router.post('/create', async function (req, res) {
     if (req.session.user.Type !== global.types.User)
         return res.redirect("/error/create/not-user");
 
-    var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [req.session.user.UserID, req.body.deparment, req.body.subject]);
+    var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?,?,?,?)", [req.session.user.UserID, req.body.deparment, parseInt(req.body.impact), parseInt(req.body.downtime), parseInt(req.body.priority), req.body.subject]);
     ticket = ticket[0];
     var txid = await SaveTicket(ticket.TicketID);
     if (txid) await MySQL.Query("CALL Tickets_Update_TXID(?,?)", [ticket.TicketID, txid]);
@@ -94,11 +94,11 @@ router.get('/ticket/:id', async function (req, res) {
 
     var txs = await GetTXs(ticket.TicketID);
     var tx = txs.filter(x => x.txid == ticket.TXID);
-    ticket.Secured = CheckTicket(ticket, tx[0]);
+    ticket.Secured = await CheckTicket(ticket, tx[0]);
 
     for (var message of messages) {
         var tx = txs.filter(x => x.txid == message.TXID);
-        message.Secured = CheckMessage(message, tx[0]);
+        message.Secured = await CheckMessage(message, tx[0]);
     }
 
     var deparments = await MySQL.Query("CALL Deparments_Read_All()")
@@ -227,8 +227,6 @@ router.get('/account', async function (req, res) {
 router.post('/telegram', async function (req, res) {
     if (!req.session.user)
         return res.redirect("/error/telegram/not-logged-in");
-    if (req.session.user.Type !== global.types.User)
-        return res.redirect("/error/telegram/only-users");
 
     var user = await MySQL.Query("CALL Users_Read_UserID(?)", [req.session.user.UserID]);
     user = user[0];

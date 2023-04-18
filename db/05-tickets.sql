@@ -9,6 +9,10 @@ CREATE TABLE Tickets (
 
     DeparmentID     INTEGER     NOT NULL,                   -- Ticket's deparment
 
+    Impact          INTEGER     NOT NULL,                   -- Impact on 
+    DownTime        INTEGER     NOT NULL,                   -- Downtime of the client service (If needed)
+    Priority        INTEGER     NOT NULL,                   -- Priority of the ticket acording to client
+
     Subject         VARCHAR(256) NOT NULL,                  -- Ticket's title                          (by team) (by client)
     Status          INTEGER      NOT NULL   DEFAULT 1,      -- Ticket's status (1-created, 2-assigned, 3-aswered, 4-replied , 5-closed)
     StatusDate      INTEGER      NOT NULL,                  -- Last update date
@@ -24,17 +28,24 @@ CREATE TABLE Tickets (
 ) //
 
 DROP PROCEDURE IF EXISTS Tickets_Create //
-CREATE PROCEDURE Tickets_Create ( IN ClientID INTEGER, IN DeparmentID INTEGER, IN Subject VARCHAR(256) )
+CREATE PROCEDURE Tickets_Create ( IN ClientID INTEGER, IN DeparmentID INTEGER, IN Impact INTEGER, IN DownTime INTEGER, IN Priority INTEGER, IN Subject VARCHAR(256) )
 BEGIN
     SET @unix = UNIX_TIMESTAMP();
 
-    INSERT INTO Tickets (ClientID, DeparmentID, Subject, StatusDate, Creation)
-    VALUES (ClientID, DeparmentID, Subject, @unix, @unix);
+    INSERT INTO Tickets (ClientID, DeparmentID, Impact, DownTime, Priority, Subject, StatusDate, Creation)
+    VALUES (ClientID, DeparmentID, Impact, DownTime, Priority, Subject, @unix, @unix);
 
     SELECT  T.*
     FROM    Tickets AS T
     WHERE   T.Subject = Subject
             AND T.Creation = @unix;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Read_All //
+CREATE PROCEDURE Tickets_Read_All ( )
+BEGIN
+    SELECT  T.*
+    FROM    Tickets AS T;
 END //
 
 DROP PROCEDURE IF EXISTS Tickets_Read_Status //

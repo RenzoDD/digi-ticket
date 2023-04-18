@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/RenzoDD/digi-ticket#readme",
   "dependencies": {
-    "digibyte-js": "^1.4.4",
+    "digibyte-js": "^1.4.7",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",

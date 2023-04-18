@@ -75,6 +75,9 @@ async function SaveTicket(TicketID) {
         var ticket = {};
         ticket.TicketID = db[0].TicketID;
         ticket.ClientID = db[0].ClientID;
+        ticket.Impact = db[0].Impact;
+        ticket.DownTime = db[0].DownTime;
+        ticket.Priority = db[0].Priority;
         ticket.Subject = db[0].Subject;
         ticket.Creation = db[0].Creation;
         console.log(`Generated object: ${JSON.stringify(ticket)}`)
@@ -189,22 +192,35 @@ async function SaveMessage(MessageID) {
     }
 }
 
-function CheckTicket(ticket, tx) {
+async function CheckTicket(ticket, tx) {
     if (!tx) return false;
 
     var tck = {};
     tck.TicketID = ticket.TicketID;
     tck.ClientID = ticket.ClientID;
+    tck.Impact = ticket.Impact;
+    tck.DownTime = ticket.DownTime;
+    tck.Priority = ticket.Priority;
     tck.Subject = ticket.Subject;
     tck.Creation = ticket.Creation;
-    
+
     var hash = SHA256(tck).toString('hex').toUpperCase();
     var op_return = tx.vout[1].hex.toUpperCase();
 
-    return op_return.indexOf(hash) !== -1;
-}
+    var result = op_return.indexOf(hash) !== -1;
 
-function CheckMessage(message, tx) {
+    if (!result) {
+        const TelegramBot = require('node-telegram-bot-api');
+        const bot = new TelegramBot(process.env.TELEGRAM);
+        var admins = await MySQL.Query('CALL Users_Read_DeparmentID_Type(?,?)', [ticket.DeparmentID, 3]);
+        for (var admin of admins)
+            if (admin.TelegramID)
+                await bot.sendMessage(admin.TelegramID, `Hello ${admin.Name}, we have detected an integrity error on ticket #${tck.TicketID}`);
+    }
+
+    return result;
+}
+async function CheckMessage(message, tx) {
     if (!tx) return false;
 
     var msg = {};
@@ -213,11 +229,37 @@ function CheckMessage(message, tx) {
     msg.UserID = message.UserID;
     msg.Text = message.Text;
     msg.Creation = message.Creation;
-    
+
     var hash = SHA256(msg).toString('hex').toUpperCase();
     var op_return = tx.vout[1].hex.toUpperCase();
 
-    return op_return.indexOf(hash) !== -1;
+    var result = op_return.indexOf(hash) !== -1;
+
+    if (!result) {
+        const TelegramBot = require('node-telegram-bot-api');
+        const bot = new TelegramBot(process.env.TELEGRAM);
+        var ticket = await MySQL.Query('CALL Tickets_Read_TicketID(?)', [msg.TicketID]);
+        var admins = await MySQL.Query('CALL Users_Read_DeparmentID_Type(?,?)', [ticket[0].DeparmentID, 3]);
+        for (var admin of admins)
+            if (admin.TelegramID)
+                await bot.sendMessage(admin.TelegramID, `Hello ${admin.Name}, we have detected an integrity error on message #${msg.MessageID} from ticket #${msg.TicketID}`);
+    }
+
+    return result;
 }
 
-module.exports = { GetWallet, GetTXs, SaveTicket, SaveMessage, CheckTicket, CheckMessage }
+async function CheckIntegrity() {
+    var explorer = new Explorer(process.env.EXPLORER);
+
+    var tickets = await MySQL.Query("CALL Tickets_Read_All()");
+    for (var ticket of tickets) {
+        var { transactions } = await explorer.address(GetWallet(ticket.TicketID).address, { details: 'txs' });
+        var messages = await MySQL.Query("CALL Messages_Read_TicketID(?)", [ticket.TicketID]);
+
+        CheckTicket(ticket, transactions.find(x => x.txid == ticket.TXID));
+        for (var message of messages)
+            CheckMessage(message, transactions.find(x => x.txid == message.TXID));
+    }
+}
+
+module.exports = { GetWallet, GetTXs, SaveTicket, SaveMessage, CheckTicket, CheckMessage, CheckIntegrity }

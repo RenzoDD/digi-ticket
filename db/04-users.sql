@@ -50,6 +50,15 @@ BEGIN
             AND U.DeparmentID = DeparmentID;
 END //
 
+DROP PROCEDURE IF EXISTS Users_Read_DeparmentID_Type //
+CREATE PROCEDURE Users_Read_DeparmentID_Type ( IN DeparmentID INTEGER, IN Type INTEGER )
+BEGIN
+    SELECT  U.*
+    FROM    Users AS U
+    WHERE   U.DeparmentID = DeparmentID
+            AND U.Type = Type;
+END //
+
 DROP PROCEDURE IF EXISTS Users_Read_UserID //
 CREATE PROCEDURE Users_Read_UserID ( IN UserID INTEGER )
 BEGIN
