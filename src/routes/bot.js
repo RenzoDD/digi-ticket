@@ -20,7 +20,7 @@ async function LinearStateBot(message, data) {
     user = user[0];
 
     if (user.Type != 1)
-        return bot.sendMessage(TelegramID, `This channel is only for clients. Please, login to manage the system.\nhttps://digiticket.net.pe/login`);
+        return bot.sendMessage(TelegramID, `Hello, this channel is only to receive notifications. Please, login to manage your tickets.\nhttps://digiticket.net.pe/login`);
 
     var Information = JSON.parse(telegram.Information);
 
@@ -189,6 +189,9 @@ async function LinearStateBot(message, data) {
             var txid = await SaveMessage(message.MessageID);
             if (txid) await MySQL.Query("CALL Messages_Update_TXID(?,?)", [message.MessageID, txid]);
 
+            var user = await MySQL.Query("CALL Users_Read_DeparmentID_Type(?,?)", [Information.DeparmentID, 3]);
+            if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, the ticket #${ticket.TicketID} is ready to be assigned!`);
+        
             Information = {};
             Information.status = "resting";
             await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);

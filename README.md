@@ -5,7 +5,7 @@ Blockchain-based help-desk management system.
 ## Technologies 🛠️
 
 * [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) - Programing Language
-* [NodeJS v18.9.1](https://nodejs.org/) - Devellopment Platform
+* [NodeJS v18.14.1](https://nodejs.org/) - Devellopment Platform
 * [MySQL v8.0.31](https://dev.mysql.com/doc/) - Relational database MySQL
 * [Telegram API](https://core.telegram.org/) - Chatbot
 * [DigiByte v7.17.3](https://core.telegram.org/) - Blockchain
@@ -28,4 +28,11 @@ DB_USER="root"
 DB_PASS=""
 
 TELEGRAM=""
+
+EXPLORER="digiexplorer.info"
+XPRV=""
+HDER="m/44'/20'/0'"
+
+UIPFS=""
+KIPFS=""
 ```
