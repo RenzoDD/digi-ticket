@@ -88,8 +88,15 @@ BEGIN
 END //
 
 CALL Users_Create(1, null, "Renzo Diaz", "renzo@remadi.net", "1234") //
+CALL Users_Create(1, null, "Jorge Coronado", "jorge@remadi.net", "1234") //
 CALL Users_Create(1, null, "Ridchard Copaja", "richard@remadi.net", "1234") //
-CALL Users_Create(2, 1, "John Yengle", "john@remadi.net", "password") //
-CALL Users_Create(2, 2, "Carlos Colina", "carlos@remadi.net", "hola") //
-CALL Users_Create(3, 1, "Andres Mares", "andres@remadi.net", "abc123") //
-CALL Users_Create(3, 2, "Yadira Lopez", "yadira@remadi.net", "qwerty") //
+
+CALL Users_Create(3, 1, "Andres Mares", "andres@remadi.net", "1234") //
+CALL Users_Create(2, 1, "John Yengle", "john@remadi.net", "1234") //
+CALL Users_Create(2, 1, "Jefferson Valenzuela", "jefferson@remadi.net", "1234") //
+CALL Users_Create(2, 1, "Leonel Ramirez", "leonel@remadi.net", "1234") //
+
+CALL Users_Create(3, 2, "Yadira Lopez", "yadira@remadi.net", "1234") //
+CALL Users_Create(2, 2, "Carlos Colina", "carlos@remadi.net", "1234") //
+CALL Users_Create(2, 2, "Yefferson Carreño", "yefferson@remadi.net", "1234") //
+CALL Users_Create(2, 2, "Benhur Carbajal", "benhur@remadi.net", "1234") //

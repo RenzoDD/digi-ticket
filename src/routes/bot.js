@@ -5,7 +5,12 @@ const express = require('express');
 const router = express.Router();
 
 const TelegramBot = require('node-telegram-bot-api');
-const bot = new TelegramBot(process.env.TELEGRAM, { polling: true });
+const bot = new TelegramBot(process.env.TELEGRAM);
+
+if (process.env.NODE_ENV == 'production')
+    bot.setWebHook("https://digiticket.net.pe/bot")
+else
+    bot.startPolling()
 
 async function LinearStateBot(message, data) {
     var TelegramID = message.chat.id;
@@ -140,7 +145,7 @@ async function LinearStateBot(message, data) {
 
             var options = {
                 reply_markup: {
-                    inline_keyboard:  [[{ text: "None", callback_data: "downtime-0" }, { text: "1 hour or less", callback_data: "downtime-1" }, { text: "2 hours", callback_data: "downtime-2" }], [{ text: "3 hours", callback_data: "downtime-3" }, { text: "4 hours", callback_data: "downtime-4" }, { text: "More", callback_data: "downtime-5" }]]
+                    inline_keyboard: [[{ text: "None", callback_data: "downtime-0" }, { text: "1 hour or less", callback_data: "downtime-1" }, { text: "2 hours", callback_data: "downtime-2" }], [{ text: "3 hours", callback_data: "downtime-3" }, { text: "4 hours", callback_data: "downtime-4" }, { text: "More", callback_data: "downtime-5" }]]
                 }
             };
 
@@ -191,7 +196,7 @@ async function LinearStateBot(message, data) {
 
             var user = await MySQL.Query("CALL Users_Read_DeparmentID_Type(?,?)", [Information.DeparmentID, 3]);
             if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, the ticket #${ticket.TicketID} is ready to be assigned!`);
-        
+
             Information = {};
             Information.status = "resting";
             await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
