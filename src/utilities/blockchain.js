@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 
 const MySQL = require('./mysql');
+const { get } = require('./request');
 
 
 const DigiByte = require('digibyte-js');
@@ -9,6 +10,7 @@ const HDPrivateKey = require('digibyte-js/lib/hdprivatekey');
 const Script = require('digibyte-js/lib/script/script');
 const Transaction = require('digibyte-js/lib/transaction/transaction');
 const Explorer = require('digibyte-js/lib/explorer');
+const Base32 = require('digibyte-js/lib/encoding/base32');
 
 async function GetUTXOs(address, override = false) {
     var path = __dirname + "/../utxos.json";
@@ -66,6 +68,10 @@ async function SaveIPFS(data) {
 
     var result = await client.add(JSON.stringify(data), { rawLeaves: true });
     return result.cid;
+}
+async function GetIPFS(cid) {
+    var data = await get('https://cloudflare-ipfs.com/ipfs/' + cid);
+    return data;
 }
 
 async function SaveTicket(TicketID) {
@@ -262,4 +268,15 @@ async function CheckIntegrity() {
     }
 }
 
-module.exports = { GetWallet, GetTXs, SaveTicket, SaveMessage, CheckTicket, CheckMessage, CheckIntegrity }
+async function Restore(hash) {
+    var cid = "b" + Base32.encode(Buffer.concat([Buffer.from("01551220", "hex"), Buffer.from(hash, 'hex')]));
+    var data = await GetIPFS(cid)
+    if (!data) return;
+
+    if (data.MessageID)
+        await MySQL.Query("CALL Messages_Restore(?,?,?,?,?)", Object.values(data));
+    else if (data.TicketID)
+        await MySQL.Query("CALL Tickets_Restore(?,?,?,?,?,?,?)", Object.values(data));
+}
+
+module.exports = { GetWallet, GetTXs, SaveTicket, SaveMessage, CheckTicket, CheckMessage, CheckIntegrity, Restore, GetWallet }

@@ -157,3 +157,16 @@ BEGIN
     SET     T.TXID = TXID
     WHERE   T.TicketID = TicketID;
 END //
+
+DROP PROCEDURE IF EXISTS Tickets_Restore //
+CREATE PROCEDURE Tickets_Restore ( IN TicketID INTEGER, IN ClientID INTEGER, IN Impact INTEGER, IN DownTime INTEGER, IN Priority INTEGER, IN Subject VARCHAR(256), IN Creation INTEGER )
+BEGIN
+    UPDATE  Tickets AS T
+    SET     T.ClientID = ClientID
+            , T.Impact = Impact
+            , T.DownTime = DownTime
+            , T.Priority = Priority
+            , T.Subject = Subject
+            , T.Creation = Creation
+    WHERE   T.TicketID = TicketID;
+END //

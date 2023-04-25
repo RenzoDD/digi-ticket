@@ -1,5 +1,5 @@
 const MySQL = require('../utilities/mysql');
-const { SaveTicket, SaveMessage, GetTXs, CheckMessage, CheckTicket } = require('../utilities/blockchain');
+const { SaveTicket, SaveMessage, GetTXs, CheckMessage, CheckTicket, Restore, GetWallet } = require('../utilities/blockchain');
 
 
 const TelegramBot = require('node-telegram-bot-api');
@@ -221,6 +221,21 @@ router.post('/deparment', async function (req, res) {
     if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, the ticket #${ticket.TicketID} has been sent yo your deparment!`);
 
     return res.redirect("/tickets");
+});
+
+// Recovery
+router.get('/recovery/:TicketID', async function (req, res) {
+    var wallet = GetWallet(0);
+    var txs = await GetTXs(req.params.TicketID);
+
+    for (var tx of txs) {
+        if (!tx.vin.find(x => x.addresses[0] == wallet.address))
+            continue;
+        var hash = tx.vout[1].hex.substr(4, 64);
+        Restore(hash);
+    }
+    
+    return res.redirect('/tickets');
 });
 
 // Service reports

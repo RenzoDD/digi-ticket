@@ -59,3 +59,14 @@ BEGIN
     SET     M.TXID = TXID
     WHERE   M.MessageID = MessageID;
 END //
+
+DROP PROCEDURE IF EXISTS Messages_Restore //
+CREATE PROCEDURE Messages_Restore ( IN MessageID INTEGER, IN TicketID INTEGER, IN UserID INTEGER, IN Text VARCHAR(2500), IN Creation INTEGER )
+BEGIN
+    UPDATE  Messages AS M
+    SET     M.TicketID = TicketID
+            , M.UserID = UserID
+            , M.Text = Text
+            , M.Creation = Creation
+    WHERE   M.MessageID = MessageID;
+END //

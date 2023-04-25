@@ -90,7 +90,16 @@
 					</div>
 					<div class="list-group-item d-flex justify-content-between align-items-start">
 						<div class="ms-2 me-auto fw-bold">
-							<%- ticket.Secured ? "<i class='bi bi-patch-check'></i> Secured by blockchain": "<i class='bi bi-patch-exclamation'></i> Integrity error" %>
+							<% if (ticket.Secured) { %>
+							<i class='bi bi-patch-check'></i> Secured by blockchain
+							<% } else { %>
+							<i class='bi bi-patch-exclamation'></i> Integrity error
+								<% if (session.user.Type == types.Admin) { %>
+								<a class="alert-link" href="/recovery/<%- ticket.TicketID %>">
+									<i class="bi bi-arrow-repeat"></i>Restore
+								</a>
+								<% } %>
+							<% } %>
 						</div>
 					</div>
 				</div>
@@ -218,7 +227,16 @@
 							<%- message.Text %>
 						</div>
 						<div class="mb-0 fw-bold">
-							<%- message.Secured ? "<i class='bi bi-patch-check'></i> Secured by blockchain": "<i class='bi bi-patch-exclamation'></i> Integrity error" %>
+							<% if (message.Secured) { %>
+							<i class='bi bi-patch-check'></i> Secured by blockchain
+							<% } else { %>
+							<i class='bi bi-patch-exclamation'></i> Integrity error
+								<% if (session.user.Type == types.Admin) { %>
+								<a class="alert-link" href="/recovery/<%- ticket.TicketID %>">
+									<i class="bi bi-arrow-repeat"></i>Restore
+								</a>
+								<% } %>
+							<% } %>
 						</div>
 					</div>
 					<% } %>
