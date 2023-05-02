@@ -41,9 +41,11 @@ async function LinearStateBot(message, data) {
                 reply_markup: {
                     inline_keyboard: [
                         [
-                            { text: 'Create a ticket', callback_data: 'create-ticket' },
-                            { text: 'Answered tickets', callback_data: 'check-inbox' },
+                            { text: 'I need help', callback_data: 'question' }
                         ],
+                        [
+                            { text: 'Answered tickets', callback_data: 'check-inbox' }
+                        ]
                     ],
                 },
             };
@@ -56,7 +58,36 @@ async function LinearStateBot(message, data) {
             if (data === null)
                 return bot.sendMessage(TelegramID, `Please, select one of the options above.`);
 
+            if (data == "question") {
+                var data = await MySQL.Query("CALL FAQ_Read_All()")
 
+                var inline_keyboard = [];
+                for (var { QuestionID, Question } of data) {
+                    inline_keyboard.push([{ text: Question, callback_data: 'question-' + QuestionID }]);
+                }
+                inline_keyboard.push([{ text: "Create a HelpDesk ticket", callback_data: "create-ticket" }]);
+
+                var options = {
+                    reply_markup: {
+                        inline_keyboard
+                    },
+                };
+
+                Information.status = "get-help";
+                await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
+                return bot.sendMessage(TelegramID, `Here are some Frecuently Asked Questions, if you still need help you can create a ticket with the last option`, options);
+
+            } else if (data === "check-inbox") {
+                var data = await MySQL.Query("CALL Tickets_Read_Status(?)", [4])
+                var { Quantity } = data[0];
+
+                Information.status = "resting";
+                await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
+                return bot.sendMessage(TelegramID, `You have ${Quantity} answered tickets. Please, use /start to resume the chat`);
+            }
+            break;
+
+        case "get-help":
             if (data === "create-ticket") {
 
                 var deparments = await MySQL.Query("CALL Deparments_Read_All()")
@@ -82,13 +113,13 @@ async function LinearStateBot(message, data) {
                 Information.status = "select-deparment";
                 await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
                 return bot.sendMessage(TelegramID, `Which deparment you want to submit the ticket?`, options);
-            } else if (data === "check-inbox") {
-                var data = await MySQL.Query("CALL Tickets_Read_Status(?)", [4])
-                var { Quantity } = data[0];
-
-                Information.status = "resting";
+            } else if (data.startsWith("question-")) {
+                var id = data.split('-')[1];
+                var data = await MySQL.Query("CALL FAQ_Read_QuestionID(?)", [id]);
+                
+                Information = {};
                 await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
-                return bot.sendMessage(TelegramID, `You have ${Quantity} answered tickets. Please, use /start to resume the chat`);
+                return bot.sendMessage(TelegramID, `${data[0].Question}\n\n${data[0].Answer}\n\nIf you need to restart the chat, send /start.`);
             }
             break;
 
@@ -200,7 +231,7 @@ async function LinearStateBot(message, data) {
             Information = {};
             Information.status = "resting";
             await MySQL.Query("CALL Telegram_Update_Information(?,?)", [TelegramID, JSON.stringify(Information)]);
-            return bot.sendMessage(TelegramID, `Your ticket #${ticket.TicketID} has been created. You can login to check the updates.`);
+            return bot.sendMessage(TelegramID, `Your ticket #${ticket.TicketID} has been created. You can login to check the updates.\n\nRestart the chat with /start.`);
     }
 }
 
