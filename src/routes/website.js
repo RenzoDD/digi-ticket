@@ -202,7 +202,6 @@ router.post('/assign', async function (req, res) {
     if (ticket.Status === global.states.Created)
         await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Assigned])
 
-        console.log(req.body.employee)
     var user = await MySQL.Query("CALL Users_Read_UserID(?)", [req.body.employee]);
     if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, you have been assigned to the ticket #${ticket.TicketID}!`);
 
@@ -234,7 +233,7 @@ router.get('/recovery/:TicketID', async function (req, res) {
         var hash = tx.vout[1].hex.substr(4, 64);
         Restore(hash);
     }
-    
+
     return res.redirect('/tickets');
 });
 
@@ -256,6 +255,18 @@ router.get('/reports', async function (req, res) {
 
     var data = await MySQL.Query("CALL Reports_Tickets_Time(?)", [req.session.user.UserID]);
     var { Time } = data[0];
+
+    var m = "days";
+    Time /= 86400; // to days
+    if (Time < 1) {
+        var m = "hours";
+        Time *= 24; // to hours
+    }
+    if (Time < 1) {
+        var m = "minutes";
+        Time *= 60; // to minutes
+    }
+    Time = Time.toFixed(0) + " " + m;
 
     return res.render('reports', { code: "/reports", session: req.session, Quantity, Open, Satisfaction, Time });
 });
