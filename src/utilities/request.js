@@ -1,81 +1,62 @@
-const http = require('http')
-const https = require('https')
+const https = require('https');
+const http = require('http');
+const URL = require('url');
 
-class Request {
-    static async Get(url) {
-        return new Promise((resolve, reject) => {
-            if (url.startsWith('http://'))
-                var api = http;
-            else if (url.startsWith('https://'))
-                var api = https;
-            else
-                resolve(null);
-    
-            api.get(url, function (result) {
-                let data = "";
-                result.on("data", function (buffer) {
-                    data += buffer;
-                });
-                result.on("end", function () {
-                    var json = null;
-    
-                    try { json = JSON.parse(data) }
-                    catch { }
-    
+function get(route, headers) {
+    return new Promise(async (resolve, reject) => {
+        var url = URL.parse(route);
+
+        (url.protocol === "https:" ? https : http).get({
+            hostname: url.hostname,
+            port: url.port,
+            path: url.path,
+            method: 'GET',
+            headers
+        }, function (result) {
+            let data = "";
+            result.on("data", (buffer) => { data += buffer; });
+            result.on("end", function () {
+                try {
+                    var json = JSON.parse(data);
                     resolve(json);
-                });
-    
-                result.on('error', (err) => {
-                    console.log(err);
-                    resolve(null)
-                })
+                }
+                catch { resolve(null); }
             });
+            result.on('error', () => { resolve(null) })
         });
-    }
-    static async Post(url, data) {
-        if (typeof data == 'object')
-            data = JSON.stringify(data);
-    
-        const dataString = data;
-    
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': dataString.length,
-            }
-        }
-    
-        return new Promise((resolve, reject) => {
-            if (url.startsWith('http://'))
-                var api = http;
-            else if (url.startsWith('https://'))
-                var api = https;
-            else
-                resolve(null);
-    
-            const req = api.request(url, options, (res) => {
-                const body = []
-                res.on('data', (chunk) => body.push(chunk))
-                res.on('end', () => {
-                    const resString = Buffer.concat(body).toString()
-                    var json = null;
-    
-                    try { json = JSON.parse(resString) }
-                    catch { }
-    
-                    resolve(json);
-                })
-            })
-    
-            req.on('error', (err) => {
-                resolve(null)
-            })
-    
-            req.write(dataString)
-            req.end()
-        })
-    }
+    });
 }
 
-module.exports = Request;
+function post(route, data, headers) {
+    if (typeof data == 'object')
+        data = JSON.stringify(data);
+
+    const dataString = data;
+
+    headers['Content-Type'] = 'application/json';
+    headers['Content-Length'] = dataString.length;
+
+    const options = {
+        method: 'POST',
+        headers
+    }
+
+    return new Promise((resolve, reject) => {
+        const req = (this.https ? https : http).request(route, options, (res) => {
+            const body = []
+            res.on('data', (chunk) => body.push(chunk))
+            res.on('end', () => {
+                const resString = Buffer.concat(body).toString();
+                var json = null;
+                try { json = JSON.parse(resString) }
+                catch { }
+                resolve(json);
+            })
+        });
+        req.on('error', (err) => { resolve(null) });
+        req.write(dataString);
+        req.end();
+    })
+}
+
+module.exports = { get, post };

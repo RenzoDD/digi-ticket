@@ -41,6 +41,44 @@
 						</div>
 						<div class="modal-body">
 							<div class="mb-3">
+								<label for="">Priority</label>
+								<div class="mb-3">
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="priority" id="priority1" value="1">
+										<label class="form-check-label" for="priority1">Low</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="priority" id="priority2" value="2">
+										<label class="form-check-label" for="priority2">Medium</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="priority" id="priority3" value="3">
+										<label class="form-check-label" for="priority3">High</label>
+									</div>
+								</div>
+							</div>
+							<div class="mb-3">
+								<label for="impact" id="impact-text">Impact (Low)</label>
+								<input type="range" class="form-range" name="impact" id="impact" oninput="update()" min="1" max="5" value="3">
+								<script>
+									function update() {
+										var impact = document.getElementById('impact');
+										var text = document.getElementById('impact-text');
+
+										if (impact.value == 1) text.innerHTML = "Impact (None)";
+										if (impact.value == 2) text.innerHTML = "Impact (Very low)";
+										if (impact.value == 3) text.innerHTML = "Impact (Low)";
+										if (impact.value == 4) text.innerHTML = "Impact (High)";
+										if (impact.value == 5) text.innerHTML = "Impact (Very high)";
+									}
+									update();
+								</script>
+							</div>
+							<div class="mb-3">
+								<label for="downtime">DownTime (hours)</label>
+								<input type="number" class="form-control" name="downtime" id="downtime">
+							</div>
+							<div class="mb-3">
 								<label class="form-label">Deparment</label>
 								<select class="form-select" name="deparment">
 									<option value="null" selected>Select deparment</option>

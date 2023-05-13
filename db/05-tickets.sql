@@ -9,11 +9,17 @@ CREATE TABLE Tickets (
 
     DeparmentID     INTEGER     NOT NULL,                   -- Ticket's deparment
 
+    Impact          INTEGER     NOT NULL,                   -- Impact on 
+    DownTime        INTEGER     NOT NULL,                   -- Downtime of the client service (If needed)
+    Priority        INTEGER     NOT NULL,                   -- Priority of the ticket acording to client
+
     Subject         VARCHAR(256) NOT NULL,                  -- Ticket's title                          (by team) (by client)
     Status          INTEGER      NOT NULL   DEFAULT 1,      -- Ticket's status (1-created, 2-assigned, 3-aswered, 4-replied , 5-closed)
     StatusDate      INTEGER      NOT NULL,                  -- Last update date
     Satisfaction    INTEGER,                                -- Satisfaction level
     Creation        INTEGER      NOT NULL,                  -- Creation time
+
+    TXID            VARCHAR(64),
 	
     PRIMARY KEY (TicketID),
     FOREIGN KEY (ClientID)      REFERENCES Users (UserID),
@@ -22,17 +28,32 @@ CREATE TABLE Tickets (
 ) //
 
 DROP PROCEDURE IF EXISTS Tickets_Create //
-CREATE PROCEDURE Tickets_Create ( IN ClientID INTEGER, IN DeparmentID INTEGER, IN Subject VARCHAR(256) )
+CREATE PROCEDURE Tickets_Create ( IN ClientID INTEGER, IN DeparmentID INTEGER, IN Impact INTEGER, IN DownTime INTEGER, IN Priority INTEGER, IN Subject VARCHAR(256) )
 BEGIN
     SET @unix = UNIX_TIMESTAMP();
 
-    INSERT INTO Tickets (ClientID, DeparmentID, Subject, StatusDate, Creation)
-    VALUES (ClientID, DeparmentID, Subject, @unix, @unix);
+    INSERT INTO Tickets (ClientID, DeparmentID, Impact, DownTime, Priority, Subject, StatusDate, Creation)
+    VALUES (ClientID, DeparmentID, Impact, DownTime, Priority, Subject, @unix, @unix);
 
     SELECT  T.*
     FROM    Tickets AS T
     WHERE   T.Subject = Subject
             AND T.Creation = @unix;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Read_All //
+CREATE PROCEDURE Tickets_Read_All ( )
+BEGIN
+    SELECT  T.*
+    FROM    Tickets AS T;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Read_Status //
+CREATE PROCEDURE Tickets_Read_Status ( IN Status INTEGER )
+BEGIN
+    SELECT  COUNT(T.TicketID) AS Quantity
+    FROM    Tickets AS T
+    WHERE   T.Status = Status;
 END //
 
 DROP PROCEDURE IF EXISTS Tickets_Read_ClientID //
@@ -126,5 +147,26 @@ BEGIN
 
     UPDATE  Tickets AS T
     SET     T.Satisfaction = Satisfaction
+    WHERE   T.TicketID = TicketID;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Update_TXID //
+CREATE PROCEDURE Tickets_Update_TXID ( IN TicketID INTEGER, IN TXID VARCHAR(64) )
+BEGIN
+    UPDATE  Tickets AS T
+    SET     T.TXID = TXID
+    WHERE   T.TicketID = TicketID;
+END //
+
+DROP PROCEDURE IF EXISTS Tickets_Restore //
+CREATE PROCEDURE Tickets_Restore ( IN TicketID INTEGER, IN ClientID INTEGER, IN Impact INTEGER, IN DownTime INTEGER, IN Priority INTEGER, IN Subject VARCHAR(256), IN Creation INTEGER )
+BEGIN
+    UPDATE  Tickets AS T
+    SET     T.ClientID = ClientID
+            , T.Impact = Impact
+            , T.DownTime = DownTime
+            , T.Priority = Priority
+            , T.Subject = Subject
+            , T.Creation = Creation
     WHERE   T.TicketID = TicketID;
 END //

@@ -1,0 +1,25 @@
+DELIMITER //
+
+DROP TABLE IF EXISTS FAQ //
+CREATE TABLE FAQ (
+    QuestionID      INTEGER NOT NULL AUTO_INCREMENT,
+    Question        TEXT,
+    Answer          TEXT,
+
+    PRIMARY KEY (QuestionID)
+) //
+
+DROP PROCEDURE IF EXISTS FAQ_Read_All //
+CREATE PROCEDURE FAQ_Read_All (  )
+BEGIN
+    SELECT  F.*
+    FROM    FAQ AS F;
+END //
+
+DROP PROCEDURE IF EXISTS FAQ_Read_QuestionID //
+CREATE PROCEDURE FAQ_Read_QuestionID ( IN QuestionID INTEGER )
+BEGIN
+    SELECT  F.*
+    FROM    FAQ AS F
+    WHERE   F.QuestionID = QuestionID;
+END //

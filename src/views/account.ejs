@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="/vendor/bootstrap.css">
+	<link rel="stylesheet" href="/vendor/bootstrap-icons.css">
+
+	<link rel="stylesheet" href="/css/style.css">
+
+	<link rel="shortcut icon" href="/img/logo.png" type="image/x-icon">
+	<title>Digi-Ticket Helpdesk - Account</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+	<%- include('./parts/header') %>
+
+	<main class="container mt-5">
+		<h1 class="fw-bold text-center mb-3">
+			Account information
+		</h1>
+
+		<div class="row justify-content-center">
+			<div class="col-md-4">
+				<ul class="list-group">
+					<li class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto">
+							<div class="fw-bold"><i class="bi bi-person"></i> Name</div>
+							<%- session.user.Name %>
+						</div>
+					</li>
+					<li class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto">
+							<div class="fw-bold"><i class="bi bi-envelope"></i> Email</div>
+							<%- session.user.Email %>
+					</li>
+					<li class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto">
+							<div class="fw-bold"><i class="bi bi-fingerprint"></i> User privileges</div>
+							<%- global.types[session.user.Type] %>
+						</div>
+					</li>
+					<li class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms-2 me-auto">
+							<div class="fw-bold"><i class="bi bi-send"></i> Telegram</div>
+							<%- (session.user.TelegramID) ? "Connected" : "Not connected" %> to our <a class="link" target="_blank" href="https://t.me/DigiTicketBot">Telegram Bot</a>
+						</div>
+					</li>
+				</ul>
+				<% if (!session.user.TelegramID) { %>
+				<div class="my-3 text-center">
+					<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#telegram">
+						<i class="bi bi-telegram"></i> Connect with Telegram
+					</button>
+				</div>
+				<div class="modal fade" id="telegram" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<form action="/telegram" method="post">
+								<div class="modal-header">
+									<h1 class="modal-title fs-5">
+										<i class="bi bi-send"></i> Connect with Telegram
+									</h1>
+									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+								<div class="modal-body">
+									<div class="mb-3">
+										<label class="form-label">6-digit code:</label>
+										<input type="text" class="form-control" name="code">
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+									<button type="submit" class="btn btn-sm btn-success">Connect</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<% } %>
+			</div>
+		</div>
+	</main>
+
+	<%- include('./parts/footer') %>
+
+	<script src="/vendor/bootstrap.js"></script>
+</body>
+
+</html>

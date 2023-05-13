@@ -1,4 +1,9 @@
 const MySQL = require('../utilities/mysql');
+const { SaveTicket, SaveMessage, GetTXs, CheckMessage, CheckTicket, Restore, GetWallet } = require('../utilities/blockchain');
+
+
+const TelegramBot = require('node-telegram-bot-api');
+const bot = new TelegramBot(process.env.TELEGRAM);
 
 const express = require('express');
 const router = express.Router();
@@ -62,11 +67,19 @@ router.post('/create', async function (req, res) {
     if (req.session.user.Type !== global.types.User)
         return res.redirect("/error/create/not-user");
 
-    var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?)", [req.session.user.UserID, req.body.deparment, req.body.subject]);
+    var ticket = await MySQL.Query("CALL Tickets_Create(?,?,?,?,?,?)", [req.session.user.UserID, req.body.deparment, parseInt(req.body.impact), parseInt(req.body.downtime), parseInt(req.body.priority), req.body.subject]);
     ticket = ticket[0];
-    
-    await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
-    
+    var txid = await SaveTicket(ticket.TicketID);
+    if (txid) await MySQL.Query("CALL Tickets_Update_TXID(?,?)", [ticket.TicketID, txid]);
+
+    var message = await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
+    message = message[0];
+    var txid = await SaveMessage(message.MessageID);
+    if (txid) await MySQL.Query("CALL Messages_Update_TXID(?,?)", [message.MessageID, txid]);
+
+    var user = await MySQL.Query("CALL Users_Read_DeparmentID_Type(?,?)", [req.body.deparment, 3]);
+    if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, the ticket #${ticket.TicketID} is ready to be assigned!`);
+
     return res.redirect("/tickets");
 });
 
@@ -86,6 +99,15 @@ router.get('/ticket/:id', async function (req, res) {
 
     var messages = await MySQL.Query("CALL Messages_Read_TicketID(?)", [ticket.TicketID])
 
+    var txs = await GetTXs(ticket.TicketID);
+    var tx = txs.filter(x => x.txid == ticket.TXID);
+    ticket.Secured = await CheckTicket(ticket, tx[0]);
+
+    for (var message of messages) {
+        var tx = txs.filter(x => x.txid == message.TXID);
+        message.Secured = await CheckMessage(message, tx[0]);
+    }
+
     var deparments = await MySQL.Query("CALL Deparments_Read_All()")
     var employees = await MySQL.Query("CALL Users_Read_DeparmentID(?)", [req.session.user.DeparmentID])
 
@@ -102,13 +124,21 @@ router.post('/answer', async function (req, res) {
     if (req.session.user.UserID !== ticket.ClientID && req.session.user.UserID !== ticket.SupportID)
         return res.redirect("/error/answer/not-involved");
 
-    await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
+    var message = await MySQL.Query("CALL Messages_Create(?,?,?)", [ticket.TicketID, req.session.user.UserID, req.body.message]);
+    message = message[0];
+    var txid = await SaveMessage(message.MessageID);
+    if (txid) await MySQL.Query("CALL Messages_Update_TXID(?,?)", [message.MessageID, txid]);
 
     if (req.session.user.Type === global.types.User) {
-        if (ticket.Status !== global.states.Created && ticket.Status !== global.states.Assigned)
-            await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Replied])
+        if (ticket.Status !== global.states.Created && ticket.Status !== global.states.Assigned) {
+            await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Replied]);
+            var user = await MySQL.Query("CALL Users_Read_UserID(?)", [ticket.SupportID]);
+            if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, the ticket #${ticket.TicketID} has been replied!`);
+        }
     } else {
-        await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Aswered])
+        await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Aswered]);
+        var user = await MySQL.Query("CALL Users_Read_UserID(?)", [ticket.ClientID]);
+        if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, your ticket #${ticket.TicketID} has been answered!`);
     }
 
     return res.redirect("/ticket/" + ticket.TicketID);
@@ -125,6 +155,9 @@ router.post('/close', async function (req, res) {
         return res.redirect("/error/close/not-involved");
 
     await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Closed])
+
+    var user = await MySQL.Query("CALL Users_Read_DeparmentID_Type(?,?)", [ticket.DeparmentID, 3]);
+    if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, the ticket #${ticket.TicketID} has been closed!`);
 
     return res.redirect("/ticket/" + ticket.TicketID);
 });
@@ -168,6 +201,10 @@ router.post('/assign', async function (req, res) {
     await MySQL.Query("CALL Tickets_Update_SupportID(?,?)", [ticket.TicketID, req.body.employee]);
     if (ticket.Status === global.states.Created)
         await MySQL.Query("CALL Tickets_Update_Status(?,?)", [ticket.TicketID, global.states.Assigned])
+
+    var user = await MySQL.Query("CALL Users_Read_UserID(?)", [req.body.employee]);
+    if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, you have been assigned to the ticket #${ticket.TicketID}!`);
+
     return res.redirect("/ticket/" + req.body.ticket);
 });
 // Change ticket deparment
@@ -179,7 +216,25 @@ router.post('/deparment', async function (req, res) {
 
     await MySQL.Query("CALL Tickets_Update_DeparmentID(?,?)", [req.body.ticket, req.body.deparment]);
 
+    var user = await MySQL.Query("CALL Users_Read_DeparmentID_Type(?,?)", [req.body.deparment, 3]);
+    if (user[0].TelegramID) bot.sendMessage(user[0].TelegramID, `Hello ${user[0].Name}, the ticket #${ticket.TicketID} has been sent yo your deparment!`);
+
     return res.redirect("/tickets");
+});
+
+// Recovery
+router.get('/recovery/:TicketID', async function (req, res) {
+    var wallet = GetWallet(0);
+    var txs = await GetTXs(req.params.TicketID);
+
+    for (var tx of txs) {
+        if (!tx.vin.find(x => x.addresses[0] == wallet.address))
+            continue;
+        var hash = tx.vout[1].hex.substr(4, 64);
+        Restore(hash);
+    }
+
+    return res.redirect('/tickets');
 });
 
 // Service reports
@@ -198,7 +253,53 @@ router.get('/reports', async function (req, res) {
     var data = await MySQL.Query("CALL Reports_Tickets_Satisfaction(?)", [req.session.user.UserID]);
     var { Satisfaction } = data[0];
 
-    return res.render('reports', { code: "/reports", session: req.session, Quantity, Open, Satisfaction });
+    var data = await MySQL.Query("CALL Reports_Tickets_Time(?)", [req.session.user.UserID]);
+    var { Time } = data[0];
+
+    var m = "days";
+    Time /= 86400; // to days
+    if (Time < 1) {
+        var m = "hours";
+        Time *= 24; // to hours
+    }
+    if (Time < 1) {
+        var m = "minutes";
+        Time *= 60; // to minutes
+    }
+    Time = Time.toFixed(0) + " " + m;
+
+    return res.render('reports', { code: "/reports", session: req.session, Quantity, Open, Satisfaction, Time });
+});
+
+router.get('/account', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/error/reports/not-logged-in");
+    return res.render('account', { code: "/account", session: req.session })
+});
+router.post('/telegram', async function (req, res) {
+    if (!req.session.user)
+        return res.redirect("/error/telegram/not-logged-in");
+
+    var user = await MySQL.Query("CALL Users_Read_UserID(?)", [req.session.user.UserID]);
+    user = user[0];
+
+    if (user.Telegram)
+        return res.redirect("/error/telegram/already-connected");
+
+    var telegram = await MySQL.Query("CALL Telegram_Read_Token(?)", [req.body.code]);
+    if (telegram.length === 0)
+        return res.redirect("/error/telegram/code-not-found");
+    telegram = telegram[0];
+
+    var user = await MySQL.Query("CALL Users_Update_Telegram(?,?)", [req.session.user.UserID, telegram.TelegramID]);
+    req.session.user = user[0];
+
+    if (!req.session.user.TelegramID)
+        return res.redirect("/error/telegram/db-error");
+
+    bot.sendMessage(req.session.user.TelegramID, `This user has been connected to ${req.session.user.Name} account. If this is a mistake contact DigiTicket support. To start chatting send /start.`);
+
+    return res.redirect("/account");
 });
 
 module.exports = router;
