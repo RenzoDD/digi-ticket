@@ -254,7 +254,10 @@ router.get('/reports', async function (req, res) {
     var data = await MySQL.Query("CALL Reports_Tickets_Satisfaction(?)", [req.session.user.UserID]);
     var { Satisfaction } = data[0];
 
-    return res.render('reports', { code: "/reports", session: req.session, Quantity, Open, Satisfaction });
+    var data = await MySQL.Query("CALL Reports_Tickets_Time(?)", [req.session.user.UserID]);
+    var { Time } = data[0];
+
+    return res.render('reports', { code: "/reports", session: req.session, Quantity, Open, Satisfaction, Time });
 });
 
 router.get('/account', async function (req, res) {
